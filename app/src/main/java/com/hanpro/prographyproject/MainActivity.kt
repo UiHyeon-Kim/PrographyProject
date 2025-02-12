@@ -4,13 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.hanpro.prographyproject.ui.navigation.AppNavHost
+import com.hanpro.prographyproject.ui.navigation.BottomNavigation
+import com.hanpro.prographyproject.ui.navigation.NavigationItem
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,11 +28,29 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PrographyProjectTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                val navController = rememberNavController()
+
+                Scaffold(
+                    topBar = {
+                        if (showBar(navController)) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.logo),
+                                contentDescription = "logo"
+                            )
+                        }
+                    },
+                    bottomBar = {
+                        if (showBar(navController)) {
+                            BottomNavigation(navController)
+                        }
+                    }
+                ) { innerPadding ->
+                    Surface(
+                        modifier = Modifier.padding(innerPadding),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavHost(navController)
+                    }
                 }
             }
         }
@@ -31,17 +58,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PrographyProjectTheme {
-        Greeting("Android")
-    }
+fun showBar(navController: NavHostController): Boolean {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    return currentRoute == NavigationItem.Home.route ||
+            currentRoute == NavigationItem.RandomPhoto.route
 }
