@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.hanpro.prographyproject.ui.HomeScreen
-import com.hanpro.prographyproject.ui.PhotoDetailScreen
-import com.hanpro.prographyproject.ui.RandomPhotoScreen
+import com.hanpro.prographyproject.ui.screens.HomeScreen
+import com.hanpro.prographyproject.ui.screens.PhotoDetailScreen
+import com.hanpro.prographyproject.ui.screens.RandomPhotoScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
