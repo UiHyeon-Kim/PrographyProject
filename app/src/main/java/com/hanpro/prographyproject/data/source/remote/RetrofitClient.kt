@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     private const val BASE_URL = "https://api.unsplash.com/"
-    private const val UNSPLASH_KEY = BuildConfig.UNSPLASH_KEY
+    private val UNSPLASH_KEY by lazy { BuildConfig.UNSPLASH_KEY }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
