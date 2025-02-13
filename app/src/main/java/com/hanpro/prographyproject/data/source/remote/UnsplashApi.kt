@@ -1,13 +1,24 @@
 package com.hanpro.prographyproject.data.source.remote
 
-import com.hanpro.prographyproject.data.model.LatestPhoto
+import com.hanpro.prographyproject.data.model.PhotoDetail
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UnsplashApi {
     @GET("photos")
     suspend fun photoPages(
         @Query("page") page: Int = 1,           // 페이지
-        @Query("per_page") perPage: Int = 10,   // 페이지 당 항목
-    ): List<LatestPhoto>
+        @Query("per_page") perPage: Int = 30,   // 페이지 당 항목
+    ): List<PhotoDetail>
+
+    @GET("photos/{id}")
+    suspend fun getPhoto(
+        @Path("id") id: String,
+    ): PhotoDetail
+
+    @GET("photos/random")
+    suspend fun getRandomPhoto(
+        // 반환 사진 수 필요한지
+    ): PhotoDetail
 }
