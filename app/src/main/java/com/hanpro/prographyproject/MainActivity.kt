@@ -70,7 +70,7 @@ fun Preview() {
         val navController = rememberNavController()
         Column {
             TopBar()
-            HomeScreen(navController)
+            HomeScreen()
         }
     }
 }
