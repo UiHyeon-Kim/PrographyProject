@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 data class PhotoUiState(
     val bookmarks: List<PhotoDetail> = emptyList(),
     val photos: List<PhotoDetail> = emptyList(),
-    val isLoading: Boolean = false, // 로딩 상태
+    val isLoading: Boolean = true, // 로딩 상태
     val error: String? = null,
 )
 
