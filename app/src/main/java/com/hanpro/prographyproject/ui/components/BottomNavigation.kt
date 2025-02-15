@@ -1,14 +1,20 @@
 package com.hanpro.prographyproject.ui.components
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -30,10 +36,12 @@ fun BottomNavigation(navController: NavHostController) {
         darkIcons = true
     )
 
-    // TODO: 아이콘 간 간격 줄이는 방법 찾기
     NavigationBar(
-        containerColor = Color(0xFF222222)
+        modifier = Modifier.height(64.dp),
+        containerColor = Color(0xFF222222),
     ) {
+        Spacer(modifier = Modifier.width(32.dp))
+
         navItems.forEach { item ->
             val isSelected = currentRoute == item.route
             NavigationBarItem(
@@ -42,6 +50,7 @@ fun BottomNavigation(navController: NavHostController) {
                         imageVector = ImageVector.vectorResource(id = item.icon),
                         contentDescription = item.title,
                         tint = if (isSelected) Color.White else Color.Gray,
+                        modifier = Modifier.size(26.dp)
                     )
                 },
                 selected = isSelected,
@@ -58,5 +67,7 @@ fun BottomNavigation(navController: NavHostController) {
                 )
             )
         }
+
+        Spacer(modifier = Modifier.width(32.dp))
     }
 }
