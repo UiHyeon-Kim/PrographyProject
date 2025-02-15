@@ -26,9 +26,8 @@ class PhotoViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoUiState())
     val uiState: StateFlow<PhotoUiState> = _uiState
 
-    fun loadLatestPhotos(page: Int = 1, perPage: Int = 10) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
                 val photos = RetrofitClient.unsplashApi.photoPages(page, perPage)
                 _uiState.value = _uiState.value.copy(
