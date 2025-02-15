@@ -1,108 +1,149 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.hanpro.prographyproject.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.domain.model.HomeUiState
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
 fun HomeScreen(
-    navController: NavHostController,
     viewModel: PhotoViewModel = PhotoViewModel(),
-    uiState: HomeUiState = HomeUiState(),
-    onImageClick: (PhotoDetail) -> Unit = {},
 ) {
-    val photos by viewModel.latestPhotos.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadLatestPhotos(page = 1)
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top),
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        verticalItemSpacing = 10.dp,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
-
-        // TODO: isNotEmpty로 바꾸기
-        if (uiState.bookmarks.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
-                    .fillMaxWidth()
-            ) {
+        if (uiState.bookmarks.isNotEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
                 Text(
                     text = "북마크",
-                    style = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight(700),
-                        color = Color(0xFF070707),
-                        // 볼드체?
-                    )
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier
+                        .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
+                        .fillMaxWidth()
                 )
             }
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
-            ) {
-                items(
-                    items = uiState.bookmarks,
-                    key = { bookmark -> bookmark.id }
-                ) { bookmark ->
-                    Card(
-                        modifier = Modifier
-                            .height(128.dp)
-                            .clickable { onImageClick },
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        // TODO: 가로 스크롤 북마크 리스트
+            item(span = StaggeredGridItemSpan.FullLine) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
+                ) {
+                    items(
+                        items = uiState.bookmarks,
+                        key = { it.id }
+                    ) { bookmark ->
+                        Card(
+                            modifier = Modifier.height(128.dp),
+                        ) {
+                            AsyncImage(
+                                model = bookmark.urls.regular,
+                                contentDescription = bookmark.description ?: "Photo",
+                            )
+                        }
                     }
-
                 }
-
             }
         }
 
-        Box(
-            modifier = Modifier
-                .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
-                .fillMaxWidth()
-        ) {
+        item(span = StaggeredGridItemSpan.FullLine) {
             Text(
                 text = "최신 이미지",
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight(700),
-                    color = Color(0xFF070707)
-                )
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier
+                    .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
+                    .fillMaxWidth()
             )
         }
 
-        // TODO: 최신 이미지 리스트
-        Surface(modifier = Modifier.fillMaxSize()) {
-            if (photos.isEmpty()) {
-                CircularProgressIndicator()
-            } else {
-                // TODO: 세로 무한 스크롤
+        items(
+            items = uiState.photos,
+            key = { it.id }
+        ) {
+            PhotoItem(photo = it)
+        }
 
+        if (uiState.isLoading) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PhotoItem(photo: PhotoDetail) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box {
+            AsyncImage(
+                model = photo.urls.regular,
+                contentDescription = photo.description ?: "Photo",
+                modifier = Modifier.fillMaxWidth()
+            )
+            val description = photo.description ?: ""
+            if (description.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.2f)
+                                )
+                            )
+                        )
+                ) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White,
+                        maxLines = 2,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
             }
         }
     }
