@@ -3,7 +3,13 @@ package com.hanpro.prographyproject.ui.theme
 import android.os.Build
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -27,6 +33,32 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+val CustomTypography = Typography(
+    // 타이틀
+    titleMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight(700),
+        fontSize = 20.sp
+    ),
+    // 이미지 타이틀
+    titleSmall = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight(500),
+        fontSize = 13.sp,
+        shadow = Shadow(
+            color = Color(0x40000000),
+            offset = Offset(0f, 2f),
+            blurRadius = 4f
+        )
+    ),
+    // 이미지 설명
+    bodyMedium = TextStyle(
+        fontFamily = Pretendard,
+        fontWeight = FontWeight(500),
+        fontSize = 15.sp,
+    ),
+)
+
 @Composable
 fun PrographyProjectTheme(
     darkTheme: Boolean = false,
@@ -46,7 +78,7 @@ fun PrographyProjectTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = CustomTypography,
         content = content
     )
 }
