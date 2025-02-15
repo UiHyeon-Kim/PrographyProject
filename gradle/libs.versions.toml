@@ -1,4 +1,5 @@
 [versions]
+accompanistSystemuicontroller = "0.34.0"
 agp = "8.7.3"
 converterGson = "2.9.0"
 kotlin = "2.0.0"
@@ -14,6 +15,7 @@ navigationCompose = "2.8.6"
 retrofit = "2.9.0"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }

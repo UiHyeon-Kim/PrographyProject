@@ -8,43 +8,69 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+data class PhotoUiState(
+    val bookmarks: List<PhotoDetail> = emptyList(),
+    val photos: List<PhotoDetail> = emptyList(),
+    val isLoading: Boolean = true, // 로딩 상태
+    val error: String? = null,
+)
+
+data class PhotoDetailUiState(
+    val photoDetail: PhotoDetail? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    // 북마크? 좋아요?
+)
+
 class PhotoViewModel : ViewModel() {
-    private val _latestPhotos = MutableStateFlow<List<PhotoDetail>>(emptyList())
-    val latestPhotos: StateFlow<List<PhotoDetail>> = _latestPhotos
+    private val _uiState = MutableStateFlow(PhotoUiState())
+    val uiState: StateFlow<PhotoUiState> = _uiState
 
-    private val _randomPhoto = MutableStateFlow<PhotoDetail?>(null)
-    val randomPhoto: StateFlow<PhotoDetail?> = _randomPhoto
-
-    fun loadLatestPhotos(page: Int = 1, perPage: Int = 10) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.unsplashApi.photoPages(page = page, perPage = perPage)
-                _latestPhotos.value += response
+                val photos = RetrofitClient.unsplashApi.photoPages(page, perPage)
+                _uiState.value = _uiState.value.copy(
+                    photos = _uiState.value.photos + photos,
+                    isLoading = false,
+                    error = null
+                )
             } catch (e: Exception) {
-                e.printStackTrace()
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
             }
         }
     }
 
     fun loadRandomPhoto() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val response = RetrofitClient.unsplashApi.getRandomPhoto()
-                _randomPhoto.value = response
+                val photo = RetrofitClient.unsplashApi.getRandomPhoto()
+                _uiState.value = _uiState.value.copy(
+                    photos = _uiState.value.photos + photo,
+                    isLoading = false,
+                    error = null
+                )
             } catch (e: Exception) {
-                e.printStackTrace()
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
             }
         }
     }
 
-    fun loadPhotoId(id: String) {
+    /*fun loadPhotoById(id: String) {
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.unsplashApi.getPhoto(id)
-                _randomPhoto.value = response
+
             } catch (e: Exception) {
-                e.printStackTrace()
+
             }
         }
-    }
+    }*/
 }

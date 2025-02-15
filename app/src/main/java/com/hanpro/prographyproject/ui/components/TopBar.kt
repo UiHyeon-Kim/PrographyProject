@@ -15,7 +15,7 @@ import com.hanpro.prographyproject.R
 @Composable
 fun TopBar() {
     Column {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().padding(top = 10.dp)) {
             Icon(
                 imageVector = ImageVector.vectorResource(id = R.drawable.logo),
                 contentDescription = "logo",
