@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
@@ -26,7 +27,7 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 fun RandomPhotoScreen(
     onBookmarkAdd: (PhotoDetail) -> Unit,
     onLoadMore: () -> Unit,
-    viewModel: PhotoViewModel = PhotoViewModel()
+    viewModel: PhotoViewModel = hiltViewModel()
 ) {
     val randomPhotos by viewModel.randomPhoto.collectAsState()
     var current by remember { mutableStateOf(0) }

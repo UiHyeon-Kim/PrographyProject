@@ -24,13 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: PhotoViewModel = PhotoViewModel(),
+    viewModel: PhotoViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

@@ -3,10 +3,12 @@ package com.hanpro.prographyproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.data.source.remote.RetrofitClient
+import com.hanpro.prographyproject.data.source.remote.UnsplashApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class PhotoUiState(
     val bookmarks: List<PhotoDetail> = emptyList(),
@@ -15,14 +17,10 @@ data class PhotoUiState(
     val error: String? = null,
 )
 
-/*data class PhotoDetailUiState(
-    val photoDetail: PhotoDetail? = null,
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    // 북마크? 좋아요?
-)*/
-
-class PhotoViewModel : ViewModel() {
+@HiltViewModel
+class PhotoViewModel @Inject constructor(
+    private val unsplashApi: UnsplashApi
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoUiState())
     val uiState: StateFlow<PhotoUiState> = _uiState
 
@@ -33,7 +31,7 @@ class PhotoViewModel : ViewModel() {
     fun loadLatestPhotos(page: Int = 0, perPage: Int = 0) {
         viewModelScope.launch {
             try {
-                val photos = RetrofitClient.unsplashApi.photoPages(page, perPage)
+                val photos = unsplashApi.photoPages(page, perPage)
                 _uiState.value = _uiState.value.copy(
                     photos = _uiState.value.photos + photos,
                     isLoading = false,
@@ -51,22 +49,11 @@ class PhotoViewModel : ViewModel() {
     fun loadRandomPhoto() {
         viewModelScope.launch {
             try {
-                val photo = RetrofitClient.unsplashApi.getRandomPhoto()
+                val photo = unsplashApi.getRandomPhoto()
                 _randomPhoto.value = photo
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
-
-    /*fun loadPhotoById(id: String) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitClient.unsplashApi.getPhoto(id)
-
-            } catch (e: Exception) {
-
-            }
-        }
-    }*/
 }
