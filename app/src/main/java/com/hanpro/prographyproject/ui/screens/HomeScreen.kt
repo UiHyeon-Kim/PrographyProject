@@ -7,10 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,23 +20,32 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.ui.viewmodel.BookmarksViewModel
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
 fun HomeScreen(
-    viewModel: PhotoViewModel = hiltViewModel(),
-) {
-    val uiState by viewModel.uiState.collectAsState()
+    photoViewModel: PhotoViewModel = hiltViewModel(),
+    bookmarkViewModel: BookmarksViewModel = hiltViewModel(),
+    //onPhotoClick: (String) -> Unit,
+    ) {
+    val uiState by photoViewModel.uiState.collectAsState()
+    val bookmarks by bookmarkViewModel.bookmarks.collectAsState()
+    val gridState = rememberLazyStaggeredGridState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadLatestPhotos(page = 1)
+        photoViewModel.loadLatestPhotos(page = 1)
     }
 
+    // TODO: 마지막까지 스크롤 시 사진 추가 로딩 구현
+
     LazyVerticalStaggeredGrid(
+        state = gridState,
         columns = StaggeredGridCells.Fixed(2),
         verticalItemSpacing = 10.dp,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -48,14 +54,9 @@ fun HomeScreen(
     ) {
         if (uiState.bookmarks.isNotEmpty()) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                Text(
-                    text = "북마크",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
-                        .fillMaxWidth()
-                )
+                CategoryTitle(title = "북마크")
             }
+
             item(span = StaggeredGridItemSpan.FullLine) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
@@ -69,10 +70,13 @@ fun HomeScreen(
                     ) { bookmark ->
                         Card(
                             modifier = Modifier.height(128.dp),
+                            // weight 0.3?
                         ) {
                             AsyncImage(
                                 model = bookmark.urls.regular,
                                 contentDescription = bookmark.description ?: "Photo",
+                                // modifier = Modifier.height(128.dp),
+                                contentScale = ContentScale.Crop
                             )
                         }
                     }
@@ -81,13 +85,7 @@ fun HomeScreen(
         }
 
         item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                text = "최신 이미지",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
-                    .fillMaxWidth()
-            )
+            CategoryTitle(title = "최신 이미지")
         }
 
         items(
@@ -110,6 +108,17 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+fun CategoryTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier
+            .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
+            .fillMaxWidth()
+    )
 }
 
 @Composable
