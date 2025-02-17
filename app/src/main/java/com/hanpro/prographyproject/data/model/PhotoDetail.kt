@@ -5,6 +5,8 @@ data class PhotoDetail(
     val description: String?,
     val urls: Urls,
     val tags: List<Tag>? = null,
+    val links: Links,
+    val user: User,
 )
 
 data class Urls(
@@ -16,4 +18,12 @@ data class Urls(
 
 data class Tag(
     val title: String
+)
+
+data class Links(
+    val download: String
+)
+
+data class User(
+    val username: String
 )
