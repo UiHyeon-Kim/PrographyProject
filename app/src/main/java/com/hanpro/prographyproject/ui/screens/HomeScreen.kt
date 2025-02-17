@@ -4,6 +4,7 @@ package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.viewmodel.BookmarksViewModel
@@ -32,14 +34,15 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 fun HomeScreen(
     photoViewModel: PhotoViewModel = hiltViewModel(),
     bookmarkViewModel: BookmarksViewModel = hiltViewModel(),
-    //onPhotoClick: (String) -> Unit,
-    ) {
+    navController: NavHostController
+) {
     val uiState by photoViewModel.uiState.collectAsState()
     val bookmarks by bookmarkViewModel.bookmarks.collectAsState()
     val gridState = rememberLazyStaggeredGridState()
 
     LaunchedEffect(Unit) {
         photoViewModel.loadLatestPhotos(page = 1)
+        bookmarkViewModel.loadBookmarks()
     }
 
     // TODO: 마지막까지 스크롤 시 사진 추가 로딩 구현
@@ -92,7 +95,9 @@ fun HomeScreen(
             items = uiState.photos,
             key = { it.id }
         ) {
-            PhotoItem(photo = it)
+            PhotoItem(
+                photo = it,
+                onClick = { navController.navigate("photoDetail/${it.id}") })
         }
 
         if (uiState.isLoading) {
@@ -122,9 +127,12 @@ fun CategoryTitle(title: String) {
 }
 
 @Composable
-fun PhotoItem(photo: PhotoDetail) {
+fun PhotoItem(
+    photo: PhotoDetail,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().clickable { onClick() }
     ) {
         Box {
             AsyncImage(
