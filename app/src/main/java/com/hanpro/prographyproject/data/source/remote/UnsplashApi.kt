@@ -13,7 +13,7 @@ interface UnsplashApi {
     ): List<PhotoDetail>
 
     @GET("photos/{id}")
-    suspend fun getPhoto(@Path("id") id: String): PhotoDetail
+    suspend fun getPhotoDetail(@Path("id") id: String): PhotoDetail
 
     @GET("photos/random")
     suspend fun getRandomPhoto(
