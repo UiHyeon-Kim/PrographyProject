@@ -15,7 +15,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -29,19 +28,19 @@ fun RandomPhotoScreen(
     onLoadMore: () -> Unit,
     viewModel: PhotoViewModel = hiltViewModel()
 ) {
-    val randomPhotos by viewModel.randomPhoto.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var current by remember { mutableStateOf(0) }
 
-    if (randomPhotos.isEmpty()) {
-        LaunchedEffect(Unit) { viewModel.loadRandomPhoto() }
+    if (uiState.randomPhotos.isEmpty()) {
+        LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
         return
     }
 
-    if (current >= randomPhotos.size) current = 0
-    val currentPhoto = randomPhotos[current]
+    if (current >= uiState.randomPhotos.size) current = 0
+    val currentPhoto = uiState.randomPhotos[current]
 
     // 배경
     Box(
@@ -164,11 +163,4 @@ fun SideButton(content: String, iconId: Int) {
                 .padding(1.dp)
         )
     }
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    RandomPhotoScreen(onBookmarkAdd = {}, onLoadMore = {})
 }
