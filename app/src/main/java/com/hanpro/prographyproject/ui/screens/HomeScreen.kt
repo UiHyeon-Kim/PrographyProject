@@ -7,16 +7,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -27,22 +24,24 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.ui.viewmodel.BookmarksViewModel
+import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
 fun HomeScreen(
-    photoViewModel: PhotoViewModel = hiltViewModel(),
-    bookmarkViewModel: BookmarksViewModel = hiltViewModel(),
+    viewModel: PhotoViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-    val uiState by photoViewModel.uiState.collectAsState()
-    val bookmarks by bookmarkViewModel.bookmarks.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val gridState = rememberLazyStaggeredGridState()
+    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        photoViewModel.loadLatestPhotos(page = 1)
-        bookmarkViewModel.loadBookmarks()
+    if (uiState.isLoading) {
+        LaunchedEffect(Unit) { viewModel.loadLatestPhotos(page = 1) }
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
     }
 
     // TODO: 마지막까지 스크롤 시 사진 추가 로딩 구현
@@ -67,18 +66,14 @@ fun HomeScreen(
                     modifier = Modifier
                         .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = uiState.bookmarks,
-                        key = { it.id }
-                    ) { bookmark ->
-                        Card(
-                            modifier = Modifier.height(128.dp),
-                            // weight 0.3?
-                        ) {
+                        key = { index, bookmark -> "${bookmark.id}_$index" }
+                    ) { _, bookmark ->
+                        Card(modifier = Modifier.height(128.dp)) {
                             AsyncImage(
                                 model = bookmark.urls.regular,
                                 contentDescription = bookmark.description ?: "Photo",
-                                // modifier = Modifier.height(128.dp),
                                 contentScale = ContentScale.Crop
                             )
                         }
@@ -91,27 +86,17 @@ fun HomeScreen(
             CategoryTitle(title = "최신 이미지")
         }
 
-        items(
-            items = uiState.photos,
-            key = { it.id }
-        ) {
+        // TODO 구현 완료 후 Indexed 제거
+        itemsIndexed(uiState.photos, key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
             PhotoItem(
-                photo = it,
-                onClick = { navController.navigate("photoDetail/${it.id}") })
+                photo = photo,
+                onClick = { selectedPhotoId = photo.id }
+            )
         }
+    }
 
-        if (uiState.isLoading) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
+    selectedPhotoId?.let { photoId ->
+        PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
     }
 }
 
