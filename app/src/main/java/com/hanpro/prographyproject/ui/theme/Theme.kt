@@ -38,24 +38,24 @@ val CustomTypography = Typography(
     titleMedium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight(700),
-        fontSize = 20.sp
+        fontSize = 24.sp
     ),
-    // 이미지 타이틀
+    // 최신 이미지 타이틀
     titleSmall = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight(500),
-        fontSize = 13.sp,
+        fontSize = 14.sp,
         shadow = Shadow(
             color = Color(0x40000000),
             offset = Offset(0f, 2f),
             blurRadius = 4f
         )
     ),
-    // 이미지 설명
+    // 디테일 이미지 설명
     bodyMedium = TextStyle(
         fontFamily = Pretendard,
         fontWeight = FontWeight(500),
-        fontSize = 15.sp,
+        fontSize = 16.sp,
     ),
 )
 
