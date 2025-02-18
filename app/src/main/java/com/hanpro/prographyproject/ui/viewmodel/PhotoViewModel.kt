@@ -3,6 +3,7 @@ package com.hanpro.prographyproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.data.source.remote.UnsplashApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,13 +14,14 @@ import javax.inject.Inject
 data class PhotoUiState(
     val bookmarks: List<PhotoDetail> = emptyList(),
     val photos: List<PhotoDetail> = emptyList(),
-    val isLoading: Boolean = true, // 로딩 상태
+    val randomPhotos: List<PhotoDetail> = emptyList(),
+    val isLoading: Boolean = true,
     val error: String? = null,
 )
 
 @HiltViewModel
 class PhotoViewModel @Inject constructor(
-    private val unsplashApi: UnsplashApi
+    private val unsplashApi: UnsplashApi,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoUiState())
     val uiState: StateFlow<PhotoUiState> = _uiState
@@ -28,7 +30,7 @@ class PhotoViewModel @Inject constructor(
     val randomPhoto: StateFlow<List<PhotoDetail>> = _randomPhoto
 
     // TODO 1 - 30 변경
-    fun loadLatestPhotos(page: Int = 0, perPage: Int = 0) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 3) {
         viewModelScope.launch {
             try {
                 val photos = unsplashApi.photoPages(page, perPage)
@@ -46,13 +48,21 @@ class PhotoViewModel @Inject constructor(
         }
     }
 
-    fun loadRandomPhoto() {
+    fun loadRandomPhotos() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val photo = unsplashApi.getRandomPhoto()
-                _randomPhoto.value = photo
+                val photos = unsplashApi.getRandomPhoto()
+                _uiState.value = _uiState.value.copy(
+                    randomPhotos = photos,
+                    isLoading = false,
+                    error = null
+                )
             } catch (e: Exception) {
-                e.printStackTrace()
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
             }
         }
     }
