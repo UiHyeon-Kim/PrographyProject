@@ -84,13 +84,12 @@ fun HomeScreen(
                 ) {
                     itemsIndexed(
                         items = uiState.bookmarks,
-                        key = { index, bookmark -> "${bookmark.id}_$index" }
+                        key = { index, bookmark -> "${bookmark.id}_$index" },
                     ) { _, bookmark ->
-                        Card(modifier = Modifier.height(128.dp)) {
+                        Card(modifier = Modifier.height(128.dp).clickable { selectedPhotoId = bookmark.id }) {
                             AsyncImage(
-                                model = bookmark.urls.regular,
-                                contentDescription = bookmark.description ?: "Photo",
-                                contentScale = ContentScale.Crop
+                                model = bookmark.imageUrl,
+                                contentDescription = bookmark.description ,
                             )
                         }
                     }
