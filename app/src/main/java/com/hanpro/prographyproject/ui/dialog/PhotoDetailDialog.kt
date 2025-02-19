@@ -36,6 +36,11 @@ fun PhotoDetailDialog(
         viewModel.loadPhotoDetail(photoId)
     }
 
+    DisposableEffect(Unit) {
+        systemUiController.setStatusBarColor(Color.Black.copy(alpha = 0.7f), darkIcons = false)
+        onDispose { systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true) }
+    }
+
     Dialog(
         onDismissRequest = onClose,
         properties = DialogProperties(
