@@ -13,7 +13,7 @@ fun AppNavHost(navController: NavHostController) {
         navController = navController,
         startDestination = NavigationItem.Home.route
     ) {
-        composable(NavigationItem.Home.route) { HomeScreen(navController = navController) }
+        composable(NavigationItem.Home.route) { HomeScreen() }
 
         composable(NavigationItem.RandomPhoto.route) {
             RandomPhotoScreen(onBookmarkAdd = {}, onLoadMore = {})

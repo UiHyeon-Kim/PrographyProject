@@ -63,10 +63,10 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
 
-    // accompanist
+    // accompanist - 시스템 ui
     implementation(libs.accompanist.systemuicontroller)
 
-    // coil
+    // coil - 이미지 로더
     implementation(libs.coil.compose)
 
     // Hilt

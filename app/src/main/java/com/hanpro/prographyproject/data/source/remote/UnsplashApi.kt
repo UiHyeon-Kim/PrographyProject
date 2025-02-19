@@ -17,6 +17,6 @@ interface UnsplashApi {
 
     @GET("photos/random")
     suspend fun getRandomPhoto(
-        @Query("count") count: Int = 3,
+        @Query("count") count: Int = 10,
     ): List<PhotoDetail>
 }

@@ -30,7 +30,6 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 @Composable
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
-    navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val gridState = rememberLazyStaggeredGridState()
@@ -63,8 +62,6 @@ fun HomeScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
                     verticalAlignment = Alignment.Top,
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp)
                 ) {
                     itemsIndexed(
                         items = uiState.bookmarks,
@@ -86,7 +83,6 @@ fun HomeScreen(
             CategoryTitle(title = "최신 이미지")
         }
 
-        // TODO 구현 완료 후 Indexed 제거
         itemsIndexed(uiState.photos, key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
             PhotoItem(
                 photo = photo,
@@ -129,6 +125,7 @@ fun PhotoItem(
             if (description.isNotEmpty()) {
                 Box(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .align(Alignment.BottomStart)
                         .background(
                             brush = Brush.verticalGradient(

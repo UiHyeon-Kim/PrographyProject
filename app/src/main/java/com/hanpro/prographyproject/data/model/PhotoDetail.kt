@@ -5,7 +5,7 @@ data class PhotoDetail(
     val description: String?,
     val urls: Urls,
     val tags: List<Tag>? = null,
-    val links: Links,
+    val links: Link,
     val user: User,
 )
 
@@ -20,7 +20,7 @@ data class Tag(
     val title: String
 )
 
-data class Links(
+data class Link(
     val download: String
 )
 

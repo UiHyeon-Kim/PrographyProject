@@ -29,8 +29,7 @@ class PhotoViewModel @Inject constructor(
     private val _randomPhoto = MutableStateFlow<List<PhotoDetail>>(emptyList())
     val randomPhoto: StateFlow<List<PhotoDetail>> = _randomPhoto
 
-    // TODO 1 - 30 변경
-    fun loadLatestPhotos(page: Int = 1, perPage: Int = 3) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
         viewModelScope.launch {
             try {
                 val photos = unsplashApi.photoPages(page, perPage)

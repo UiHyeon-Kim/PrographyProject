@@ -31,9 +31,6 @@ fun PhotoDetailDialog(
     val uiState by viewModel.uiState.collectAsState()
 
     val systemUiController = rememberSystemUiController()
-    SideEffect {
-        systemUiController.setStatusBarColor(Color.Black.copy(alpha = 0.7f), darkIcons = false)
-    }
 
     LaunchedEffect(photoId) {
         viewModel.loadPhotoDetail(photoId)
@@ -57,10 +54,11 @@ fun PhotoDetailDialog(
                 Log.e("PhotoDetailScreen", "Error: ${uiState.error}")
             } else {
                 uiState.photo?.let { photo ->
+                    // 디테일 이미지
                     Box(
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 12.dp)
+                            .padding(horizontal = 12.dp)
                             .align(Alignment.Center)
                     ) { PhotoDetailContent(photo = photo) }
 
@@ -79,22 +77,27 @@ fun PhotoDetailDialog(
                             .align(Alignment.BottomCenter)
                             .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 10.dp)
                     ) {
+                        val description = photo.description ?: ""
                         Text(
-                            text = "타이틀?",
+                            text = photo.tags?.first()?.title ?: "",
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.White,
                             maxLines = 1
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = photo.description ?: "",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White,
-                            maxLines = 2
-                        )
+
+                        if (description.isNotEmpty()) {
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White,
+                                maxLines = 2
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = photo.tags?.joinToString(" ") { it.title } ?: "",
+                            text = photo.tags?.joinToString(" ") { "#${it.title}" } ?: "",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White,
                             maxLines = 1
@@ -121,10 +124,12 @@ fun DetailTopBar(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 왼쪽 열
         Row(
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // 닫기 버튼
             IconButton(
                 modifier = Modifier
 //                    .size(24.dp)
@@ -149,7 +154,9 @@ fun DetailTopBar(
             )
         }
 
+        // 오른쪽 열
         Row {
+            // 다운로드 버튼
             IconButton(
                 modifier = Modifier.size(40.dp),
                 onClick = onDownloadClick,
@@ -163,6 +170,7 @@ fun DetailTopBar(
 
             Spacer(modifier = Modifier.width(4.dp))
 
+            // 북마크 버튼
             IconButton(
                 modifier = Modifier.size(40.dp),
                 onClick = onBookmarkClick,
@@ -170,7 +178,7 @@ fun DetailTopBar(
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
                     contentDescription = "bookmark",
-                    tint = if (isBookmarked) Color.White else Color(0xFFB3B3BE),
+                    tint = if (isBookmarked) Color.White else Color.Gray,
                 )
             }
         }
@@ -182,7 +190,6 @@ fun PhotoDetailContent(photo: PhotoDetail) {
     Card(
         Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
             .background(color = Color.Transparent, shape = RoundedCornerShape(15.dp))
     ) {
         AsyncImage(
