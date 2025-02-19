@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
@@ -30,6 +31,7 @@ fun RandomPhotoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var current by remember { mutableStateOf(0) }
+    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
     if (uiState.randomPhotos.isEmpty()) {
         LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
@@ -94,9 +96,15 @@ fun RandomPhotoScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    SideButton(content = "x", iconId = R.drawable.x)
+                    // 넘기기? 버튼
+                    SideButton(
+                        content = "x",
+                        iconId = R.drawable.x,
+                        onClick = {}
+                    )
                     Spacer(modifier = Modifier.width(32.dp))
 
+                    // 북마크 버튼
                     IconButton(
                         modifier = Modifier
                             .width(72.dp)
@@ -118,10 +126,19 @@ fun RandomPhotoScreen(
                     }
 
                     Spacer(modifier = Modifier.width(32.dp))
-                    SideButton(content = "information", iconId = R.drawable.information)
+                    // 디테일 버튼
+                    SideButton(
+                        content = "information",
+                        iconId = R.drawable.information,
+                        onClick = { selectedPhotoId = currentPhoto.id }
+                    )
                 }
             }
         }
+    }
+
+    selectedPhotoId?.let { photoId ->
+        PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
     }
 }
 
@@ -144,7 +161,7 @@ fun RandomPhotoItem(randomPhoto: PhotoDetail) {
 }
 
 @Composable
-fun SideButton(content: String, iconId: Int) {
+fun SideButton(content: String, iconId: Int, onClick: () -> Unit) {
     IconButton(
         modifier = Modifier
             .width(52.dp)
@@ -152,7 +169,7 @@ fun SideButton(content: String, iconId: Int) {
             .padding(8.dp)
             .background(color = Color.White, shape = RoundedCornerShape(36.dp))
             .border(1.dp, Color(0xFFEAEBEF), shape = RoundedCornerShape(36.dp)),
-        onClick = {}
+        onClick = onClick
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(id = iconId),
