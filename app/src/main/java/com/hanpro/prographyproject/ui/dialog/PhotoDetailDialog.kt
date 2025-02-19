@@ -1,6 +1,8 @@
 package com.hanpro.prographyproject.ui.dialog
 
+import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -11,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -20,7 +23,10 @@ import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.data.source.remote.downloadImage
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
+import kotlinx.coroutines.launch
+import java.io.File
 
 @Composable
 fun PhotoDetailDialog(
@@ -29,6 +35,7 @@ fun PhotoDetailDialog(
     viewModel: PhotoDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
 
@@ -72,8 +79,20 @@ fun PhotoDetailDialog(
                         userName = photo.user.username,
                         isBookmarked = uiState.isBookmarked,
                         onClose = onClose,
-                        onDownloadClick = { photo.links.download },
-                        onBookmarkClick = { /* TODO: 북마크 추가 기능 구현 */ }
+                        onDownloadClick = {
+                            val fileName = "${photo.id}.jpg"
+                            val imageFile = File(
+                                context.getExternalFilesDir(Environment.DIRECTORY_DCIM),
+                                fileName
+                            )
+                            val success = downloadImage(photo.links.download, imageFile)
+                            if(success) Toast.makeText(context, "이미지를 저장했습니다.", Toast.LENGTH_SHORT).show()
+                            else Toast.makeText(context, "이미지를 저장하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                        },
+                        onBookmarkClick = {
+                            if (!uiState.isBookmarked) viewModel.addBookmark(photo)
+                            else viewModel.deleteBookmark(photo)
+                        }
                     )
 
                     Column(
@@ -120,9 +139,11 @@ fun DetailTopBar(
     userName: String = "",
     isBookmarked: Boolean,
     onClose: () -> Unit,
-    onDownloadClick: () -> Unit,
+    onDownloadClick: suspend () -> Unit,
     onBookmarkClick: () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -137,7 +158,6 @@ fun DetailTopBar(
             // 닫기 버튼
             IconButton(
                 modifier = Modifier
-//                    .size(24.dp)
                     .background(color = Color.White, shape = RoundedCornerShape(24.dp))
                     .border(1.dp, Color(0xFFEAEBEF), shape = RoundedCornerShape(24.dp)),
                 onClick = onClose
@@ -164,7 +184,7 @@ fun DetailTopBar(
             // 다운로드 버튼
             IconButton(
                 modifier = Modifier.size(40.dp),
-                onClick = onDownloadClick,
+                onClick = { coroutineScope.launch { onDownloadClick() } },
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.download),
