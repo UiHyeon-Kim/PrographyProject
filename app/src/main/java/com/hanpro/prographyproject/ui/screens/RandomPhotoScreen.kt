@@ -28,12 +28,10 @@ fun RandomPhotoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
-
     var currentIndex by remember { mutableIntStateOf(0) }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
     val threshold = 200f
-    val visiblePhotos = uiState.randomPhotos.drop(currentIndex).take(3)
 
     LaunchedEffect(currentIndex) {
         if (currentIndex >= uiState.randomPhotos.size - 2) {
@@ -79,15 +77,11 @@ fun RandomPhotoScreen(
                                         viewModel.addBookmark(photo)
                                         moveToNextCard(uiState.randomPhotos.size) {
                                             currentIndex++
-                                            offsetX = 0f
-                                            offsetY = 0f
                                         }
                                     }
                                     offsetX < -threshold -> {
                                         moveToNextCard(uiState.randomPhotos.size) {
                                             currentIndex++
-                                            offsetX = 0f
-                                            offsetY = 0f
                                         }
                                     }
                                     else -> {
@@ -184,18 +178,87 @@ fun RandomPhotoScreen(
                 }
             }
         }
-
-
     }
-
     selectedPhotoId?.let { photoId ->
         PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
     }
 }
 
 @Composable
+fun PhotoCardItem(
+    photo: PhotoDetail,
+    onNextClick: () -> Unit,
+    onBookmarkClick: (PhotoDetail) -> Unit,
+    onDetailClick: (String) -> Unit,
+) {
+    // 필름 사진 배경
+    Card(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White, shape = RoundedCornerShape(15.dp))
+            .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp)),
+        shape = RoundedCornerShape(15.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+    ) {
+        Column(modifier = Modifier.background(Color.Transparent)) {
+            // 이미지 겹치기 위한 박스
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(Color.White)
+            ) { RandomPhotoItem(randomPhoto = photo) }
+            // 버튼 행
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(start = 44.dp, top = 24.dp, end = 44.dp, bottom = 24.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // 다음 사진 버튼
+                SideButton(
+                    content = "x",
+                    iconId = R.drawable.x,
+                    onClick = onNextClick
+                )
+                Spacer(modifier = Modifier.width(32.dp))
+
+                // 북마크 버튼
+                IconButton(
+                    modifier = Modifier
+                        .width(72.dp)
+                        .height(72.dp)
+                        .background(
+                            color = Color(0xFFD81D45),
+                            shape = RoundedCornerShape(36.dp)
+                        ),
+                    onClick = { onBookmarkClick(photo) }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
+                        contentDescription = "bookmark",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp).padding(1.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(32.dp))
+                // 디테일 버튼
+                SideButton(
+                    content = "information",
+                    iconId = R.drawable.information,
+                    onClick = { onDetailClick(photo.id) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun RandomPhotoItem(randomPhoto: PhotoDetail) {
-    // 이미지 틀
+    // 이미지
     Card(
         modifier = Modifier
             .fillMaxWidth()
