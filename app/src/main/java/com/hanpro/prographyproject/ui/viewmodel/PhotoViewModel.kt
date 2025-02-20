@@ -67,7 +67,7 @@ class PhotoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val photos = unsplashApi.getRandomPhoto()
+                val photos = unsplashApi.getRandomPhoto(10)
                 _uiState.value = _uiState.value.copy(
                     randomPhotos = photos,
                     isLoading = false,

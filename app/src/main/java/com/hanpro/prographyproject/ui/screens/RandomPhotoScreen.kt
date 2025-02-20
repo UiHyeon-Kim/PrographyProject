@@ -2,6 +2,7 @@ package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -10,8 +11,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.R
@@ -24,8 +27,20 @@ fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var current by remember { mutableStateOf(0) }
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
+    var offsetY by remember { mutableFloatStateOf(0f) }
+    val threshold = 200f
+    val visiblePhotos = uiState.randomPhotos.drop(currentIndex).take(3)
+
+    LaunchedEffect(currentIndex) {
+        if (currentIndex >= uiState.randomPhotos.size - 2) {
+            viewModel.loadRandomPhotos()
+            currentIndex = 0
+        }
+    }
 
     if (uiState.randomPhotos.isEmpty()) {
         LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
@@ -35,8 +50,8 @@ fun RandomPhotoScreen(
         return
     }
 
-    if (current >= uiState.randomPhotos.size) current = 0
-    val currentPhoto = uiState.randomPhotos[current]
+    if (currentIndex >= uiState.randomPhotos.size) currentIndex = 0
+    val currentPhoto = uiState.randomPhotos[currentIndex]
 
     // 배경
     Box(
@@ -46,85 +61,131 @@ fun RandomPhotoScreen(
             .padding(start = 24.dp, top = 28.dp, end = 24.dp, bottom = 44.dp),
         contentAlignment = Alignment.Center
     ) {
-        // 필름 사진 배경
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White, shape = RoundedCornerShape(15.dp))
-                .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp)),
-            shape = RoundedCornerShape(15.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-        ) {
-            // 새로 열
-            Column(
-                modifier = Modifier.background(Color.Transparent)
-            ) {
-                // 이미지 겹치기 위한 박스
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .background(Color.White)
-                ) { RandomPhotoItem(randomPhoto = currentPhoto) }
-                // 버튼 행
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White)
-                        .padding(
-                            start = 44.dp,
-                            top = 24.dp,
-                            end = 44.dp,
-                            bottom = 24.dp
-                        ),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    // 넘기기? 버튼
-                    SideButton(
-                        content = "x",
-                        iconId = R.drawable.x,
-                        onClick = {}
-                    )
-                    Spacer(modifier = Modifier.width(32.dp))
+        visiblePhotos.forEachIndexed { index, photo ->
+            val cardIndex = currentIndex + index
+            val isTopCard = index == 0
 
-                    // 북마크 버튼
-                    IconButton(
-                        modifier = Modifier
-                            .width(72.dp)
-                            .height(72.dp)
-                            .background(
-                                color = Color(0xFFD81D45),
-                                shape = RoundedCornerShape(36.dp)
-                            ),
-                        onClick = {
-                            if (!viewModel.isBookmarked(currentPhoto.id)) {
-                                viewModel.addBookmark(currentPhoto)
-                            } else {
-                                viewModel.deleteBookmark(currentPhoto)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp)
+                    .offset(x = offsetX.dp, y = offsetY.dp)
+                    .zIndex(index.toFloat())
+                    .pointerInput(isTopCard) {
+                        detectDragGestures(
+                            onDragEnd = {
+                                when {
+                                    offsetX > threshold -> {
+                                        viewModel.addBookmark(photo)
+                                        moveToNextCard(uiState.randomPhotos.size) {
+                                            currentIndex++
+                                            offsetX = 0f
+                                            offsetY = 0f
+                                        }
+                                    }
+                                    offsetX < -threshold -> {
+                                        moveToNextCard(uiState.randomPhotos.size) {
+                                            currentIndex++
+                                            offsetX = 0f
+                                            offsetY = 0f
+                                        }
+                                    }
+                                    else -> {
+                                        offsetX = 0f
+                                        offsetY = 0f
+                                    }
+                                }
                             }
+                        ) { change, dragAmount ->
+                            change.consume()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
                         }
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
-                            contentDescription = "bookmark",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .padding(1.dp)
-                        )
                     }
+            ) {
+                // 필름 사진 배경
+                Card(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White, shape = RoundedCornerShape(15.dp))
+                        .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp)),
+                    shape = RoundedCornerShape(15.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                ) {
+                    // 새로 열
+                    Column(
+                        modifier = Modifier.background(Color.Transparent)
+                    ) {
+                        // 이미지 겹치기 위한 박스
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .background(Color.White)
+                        ) { RandomPhotoItem(randomPhoto = currentPhoto) }
+                        // 버튼 행
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(
+                                    start = 44.dp,
+                                    top = 24.dp,
+                                    end = 44.dp,
+                                    bottom = 24.dp
+                                ),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // 넘기기? 버튼
+                            SideButton(
+                                content = "x",
+                                iconId = R.drawable.x,
+                                onClick = {}
+                            )
+                            Spacer(modifier = Modifier.width(32.dp))
 
-                    Spacer(modifier = Modifier.width(32.dp))
-                    // 디테일 버튼
-                    SideButton(
-                        content = "information",
-                        iconId = R.drawable.information,
-                        onClick = { selectedPhotoId = currentPhoto.id }
-                    )
+                            // 북마크 버튼
+                            IconButton(
+                                modifier = Modifier
+                                    .width(72.dp)
+                                    .height(72.dp)
+                                    .background(
+                                        color = Color(0xFFD81D45),
+                                        shape = RoundedCornerShape(36.dp)
+                                    ),
+                                onClick = {
+                                    if (!viewModel.isBookmarked(currentPhoto.id)) {
+                                        viewModel.addBookmark(currentPhoto)
+                                    } else {
+                                        viewModel.deleteBookmark(currentPhoto)
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
+                                    contentDescription = "bookmark",
+                                    tint = Color.White,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .padding(1.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(32.dp))
+                            // 디테일 버튼
+                            SideButton(
+                                content = "information",
+                                iconId = R.drawable.information,
+                                onClick = { selectedPhotoId = currentPhoto.id }
+                            )
+                        }
+                    }
                 }
             }
         }
+
+
     }
 
     selectedPhotoId?.let { photoId ->
@@ -170,4 +231,8 @@ fun SideButton(content: String, iconId: Int, onClick: () -> Unit) {
                 .padding(1.dp)
         )
     }
+}
+
+private fun moveToNextCard(totalSize: Int, onNext: () -> Unit) {
+    onNext()
 }
