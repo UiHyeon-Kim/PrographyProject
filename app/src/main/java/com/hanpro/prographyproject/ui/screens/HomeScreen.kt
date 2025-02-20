@@ -116,7 +116,6 @@ fun HomeScreen(
                 }
             }
         }
-
     }
 
     // 상태 호이스팅
@@ -148,7 +147,7 @@ fun PhotoItem(
     ) {
         Box {
             AsyncImage(
-                model = photo.urls.regular,
+                model = photo.urls.small,
                 contentDescription = photo.description ?: "Photo",
                 modifier = Modifier.fillMaxWidth()
             )

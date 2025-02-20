@@ -58,7 +58,6 @@ class PhotoDetailViewModel @Inject constructor(
             )
             _uiState.value = _uiState.value.copy(isBookmarked = true)
         }
-
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
