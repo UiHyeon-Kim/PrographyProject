@@ -9,6 +9,7 @@ import com.hanpro.prographyproject.domain.repository.BookmarkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -79,5 +80,37 @@ class PhotoViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun addBookmark(photo: PhotoDetail) {
+        viewModelScope.launch {
+            bookmarkRepository.addBookmark(
+                Bookmark(
+                    id = photo.id,
+                    description = photo.description ?: "",
+                    imageUrl = photo.urls.regular
+                )
+            )
+            val updatedBookmarks = bookmarkRepository.getBookmarks().first()
+            _uiState.value = _uiState.value.copy(bookmarks = updatedBookmarks)
+        }
+    }
+
+    fun deleteBookmark(photo: PhotoDetail) {
+        viewModelScope.launch {
+            bookmarkRepository.deleteBookmark(
+                Bookmark(
+                    id = photo.id,
+                    description = photo.description ?: "",
+                    imageUrl = photo.urls.regular
+                )
+            )
+            val updatedBookmarks = bookmarkRepository.getBookmarks().first()
+            _uiState.value = _uiState.value.copy(bookmarks = updatedBookmarks)
+        }
+    }
+
+    fun isBookmarked(photoId: String): Boolean {
+        return _uiState.value.bookmarks.any { it.id == photoId }
     }
 }

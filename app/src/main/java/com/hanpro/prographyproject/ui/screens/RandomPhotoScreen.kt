@@ -97,7 +97,13 @@ fun RandomPhotoScreen(
                                 color = Color(0xFFD81D45),
                                 shape = RoundedCornerShape(36.dp)
                             ),
-                        onClick = {}
+                        onClick = {
+                            if (!viewModel.isBookmarked(currentPhoto.id)) {
+                                viewModel.addBookmark(currentPhoto)
+                            } else {
+                                viewModel.deleteBookmark(currentPhoto)
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
