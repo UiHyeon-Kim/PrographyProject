@@ -29,9 +29,9 @@ fun BottomNavigation(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val systemIoController = rememberSystemUiController()
-    systemIoController.setNavigationBarColor(Color(0xFF222222))
-    systemIoController.setStatusBarColor(
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setNavigationBarColor(Color(0xFF222222))
+    systemUiController.setStatusBarColor(
         color = Color(0x00000000),
         darkIcons = true
     )
