@@ -4,14 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -25,8 +21,6 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 
 @Composable
 fun RandomPhotoScreen(
-    onBookmarkAdd: (PhotoDetail) -> Unit,
-    onLoadMore: () -> Unit,
     viewModel: PhotoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -56,24 +50,14 @@ fun RandomPhotoScreen(
         Card(
             modifier = Modifier
                 .fillMaxSize()
-                .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp))
                 .background(Color.White, shape = RoundedCornerShape(15.dp))
-                .shadow(
-                    elevation = 25.dp,
-                    spotColor = Color(0x1F000000),
-                    ambientColor = Color(0x1F000000)
-                ),
-            shape = RoundedCornerShape(15.dp)
+                .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp)),
+            shape = RoundedCornerShape(15.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         ) {
             // 새로 열
             Column(
-                modifier = Modifier
-                    .background(Color.Transparent)
-                    .shadow(
-                        elevation = 25.dp,
-                        spotColor = Color(0x1F000000),
-                        ambientColor = Color(0x1F000000)
-                    )
+                modifier = Modifier.background(Color.Transparent)
             ) {
                 // 이미지 겹치기 위한 박스
                 Box(
