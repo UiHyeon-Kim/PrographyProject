@@ -7,7 +7,9 @@
 - **주요 기능**
   - Unsplash의 최신 이미지 조회 및 랜덤 이미지 조회
   - 이미지 북마크 및 다운로드 기능
-  
+
+</br>
+
 ## 🛠 Tech Stack & Libraries
 - **Language**: Kotlin  
 - **UI Framework**: Jetpack Compose  
@@ -19,9 +21,11 @@
 - **Navigation**: Compose Navigation  
 - **Coroutines**: StateFlow, Flow
 
-## Pakage Struct
+</br>
+
+## 📂 Package Structure
 ```
-com.hanpro.prographyproject
+🗂️com.hanpro.prographyproject
 ├─📂data
 │  ├─📂model
 │  │  └─📄PhotoDetail.kt
@@ -59,8 +63,12 @@ com.hanpro.prographyproject
 ├─📄MainActivity.kt
 └─📄PrographyApplication.kt
 ```
-## 🔍 개선방향
+
+</br>
+
+## 🔍 Improvements
 - HomeScreen 북마크 이미지 LazyVerticalStaggeredGrid의 padding에 가려지지 않도록 하기
   - ~~LazyColumn + LazyVerticalStaggeredGrid 조합 크래시~~
-  - 
+- 스켈레톤 뷰
+- RandomPhotoScreen
 
