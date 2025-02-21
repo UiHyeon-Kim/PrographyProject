@@ -17,6 +17,7 @@ data class PhotoUiState(
     val bookmarks: List<Bookmark> = emptyList(),
     val photos: List<PhotoDetail> = emptyList(),
     val randomPhotos: List<PhotoDetail> = emptyList(),
+    val randomPhotoIndex: Int = 0,
     val isLoading: Boolean = true,
     val error: String? = null,
 )
@@ -80,6 +81,10 @@ class PhotoViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun incrementIndex() {
+        _uiState.value = _uiState.value.copy(randomPhotoIndex = _uiState.value.randomPhotoIndex + 1)
     }
 
     fun addBookmark(photo: PhotoDetail) {
