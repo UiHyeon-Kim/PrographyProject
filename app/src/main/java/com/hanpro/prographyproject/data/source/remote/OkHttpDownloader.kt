@@ -1,5 +1,6 @@
 package com.hanpro.prographyproject.data.source.remote
 
+import com.hanpro.prographyproject.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -13,7 +14,11 @@ suspend fun downloadImage(
     client: OkHttpClient = OkHttpClient()
 ): Boolean = withContext(Dispatchers.IO) {
     try {
-        val request = okhttp3.Request.Builder().url(imageUrl).build()
+        imageFile.parentFile?.let { if (!it.exists()) it.mkdirs() }
+        val request = okhttp3.Request.Builder()
+            .url(imageUrl)
+            .header("Authorization", "Client-ID ${BuildConfig.UNSPLASH_KEY}")
+            .build()
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("예상치 못한 코드입니다. $response")
             response.body?.byteStream()?.use { inputStream ->
