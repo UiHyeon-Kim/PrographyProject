@@ -62,6 +62,28 @@ fun HomeScreen(
             }
     }
 
+    if (uiState.photos.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp),
+                color = Color.LightGray,
+                strokeWidth = 4.dp,
+                progress = 1f
+            )
+
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp),
+                color = Color.Gray,
+                strokeWidth = 4.dp,
+            )
+        }
+    }
+
     LazyVerticalStaggeredGrid(
         state = gridState,
         columns = StaggeredGridCells.Fixed(2),
@@ -75,24 +97,48 @@ fun HomeScreen(
                 CategoryTitle(title = "북마크")
             }
 
-            item(span = StaggeredGridItemSpan.FullLine) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                    verticalAlignment = Alignment.Top,
-                ) {
-                    itemsIndexed(
-                        items = uiState.bookmarks,
-                        key = { index, bookmark -> "${bookmark.id}_$index" },
-                    ) { _, bookmark ->
-                        Card(
-                            modifier = Modifier
-                                .height(128.dp)
-                                .clickable { selectedPhotoId = bookmark.id }) {
-                            AsyncImage(
-                                model = bookmark.imageUrl,
-                                contentDescription = bookmark.description,
-                            )
+            if (uiState.photos.isNotEmpty()) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        itemsIndexed(
+                            items = uiState.bookmarks,
+                            key = { index, bookmark -> "${bookmark.id}_$index" },
+                        ) { _, bookmark ->
+                            Card(
+                                modifier = Modifier
+                                    .height(128.dp)
+                                    .clickable { selectedPhotoId = bookmark.id }) {
+                                AsyncImage(
+                                    model = bookmark.imageUrl,
+                                    contentDescription = bookmark.description,
+                                )
+                            }
                         }
+                    }
+                }
+            } else {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(64.dp),
+                            color = Color.LightGray,
+                            strokeWidth = 4.dp,
+                            progress = 1f
+                        )
+
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(64.dp),
+                            color = Color.Gray,
+                            strokeWidth = 4.dp,
+                        )
                     }
                 }
             }
@@ -109,13 +155,7 @@ fun HomeScreen(
             )
         }
 
-        if (uiState.isLoading) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
+
     }
 
     // 상태 호이스팅

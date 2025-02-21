@@ -37,7 +37,7 @@ fun RandomPhotoScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
-    var currentIndex by remember { mutableIntStateOf(0) }
+    var currentIndex = uiState.randomPhotoIndex
     var offsetX = remember { Animatable(0f) }
     var offsetY = remember { Animatable(0f) }
     val threshold = 200f
@@ -51,7 +51,18 @@ fun RandomPhotoScreen(
     if (uiState.randomPhotos.isEmpty()) {
         LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp),
+                color = Color.LightGray,
+                strokeWidth = 4.dp,
+                progress = 1f
+            )
+
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp),
+                color = Color.Gray,
+                strokeWidth = 4.dp,
+            )
         }
         return
     }
@@ -90,7 +101,7 @@ fun RandomPhotoScreen(
                                     coroutineScope.launch {
                                         viewModel.addBookmark(currentPhoto)
                                         animateOutCard(offsetX, offsetY, toRight = true) {
-                                            currentIndex++
+                                            viewModel.incrementIndex()
                                         }
                                     }
                                 }
@@ -98,7 +109,7 @@ fun RandomPhotoScreen(
                                 offsetX.value < -threshold -> {
                                     coroutineScope.launch {
                                         animateOutCard(offsetX, offsetY, toRight = false) {
-                                            currentIndex++
+                                            viewModel.incrementIndex()
                                         }
                                     }
                                 }
@@ -123,11 +134,11 @@ fun RandomPhotoScreen(
 
             PhotoCardItem(
                 photo = currentPhoto,
-                onNextClick = { currentIndex++ },
+                onNextClick = { viewModel.incrementIndex() },
                 onBookmarkClick = { photo ->
                     if (!viewModel.isBookmarked(photo.id)) {
                         viewModel.addBookmark(photo)
-                        currentIndex++
+                        viewModel.incrementIndex()
                     }
                     else {
                         viewModel.deleteBookmark(photo)
@@ -165,7 +176,8 @@ fun PhotoCardItem(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(Color.White)
-            ) { RandomPhotoItem(randomPhoto = photo) }
+            ) {
+                RandomPhotoItem(randomPhoto = photo) }
             // 버튼 행
             Row(
                 modifier = Modifier
