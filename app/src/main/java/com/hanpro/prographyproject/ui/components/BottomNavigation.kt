@@ -21,7 +21,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.ui.navigation.NavigationItem
 
 @Composable
-fun BottomNavigation(navController: NavHostController) {
+fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     val navItems = listOf(
         NavigationItem.Home,
         NavigationItem.RandomPhoto
@@ -37,7 +37,7 @@ fun BottomNavigation(navController: NavHostController) {
     )
 
     NavigationBar(
-        modifier = Modifier.height(64.dp),
+        modifier = modifier.height(64.dp),
         containerColor = Color(0xFF222222),
     ) {
         Spacer(modifier = Modifier.width(32.dp))

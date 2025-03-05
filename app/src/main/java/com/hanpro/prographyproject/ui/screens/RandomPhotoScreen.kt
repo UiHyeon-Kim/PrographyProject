@@ -21,9 +21,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.ui.components.BottomNavigation
+import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
@@ -31,7 +34,8 @@ import kotlin.math.roundToInt
 
 @Composable
 fun RandomPhotoScreen(
-    viewModel: PhotoViewModel = hiltViewModel()
+    viewModel: PhotoViewModel = hiltViewModel(),
+    navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -70,84 +74,100 @@ fun RandomPhotoScreen(
     val currentPhoto = uiState.randomPhotos.getOrNull(currentIndex) ?: return
     val nextPhoto = uiState.randomPhotos.getOrNull(currentIndex + 1)
 
-    // 배경
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 24.dp, top = 28.dp, end = 24.dp, bottom = 45.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        nextPhoto?.let {
-            PhotoCardItem(
-                photo = it,
-                onNextClick = {},
-                onBookmarkClick = {},
-                onDetailClick = {},
-            )
-        }
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        TopBar(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .zIndex(1f)
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
-                .graphicsLayer { rotationZ = (offsetX.value / threshold) * 10f }
-                .zIndex(1f)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragEnd = {
-                            when {
-                                // 오른쪽 스와이프
-                                offsetX.value > threshold -> {
-                                    coroutineScope.launch {
-                                        viewModel.addBookmark(currentPhoto)
-                                        animateOutCard(offsetX, offsetY, toRight = true) {
-                                            viewModel.incrementIndex()
-                                        }
-                                    }
-                                }
-                                // 왼쪽 스와이프
-                                offsetX.value < -threshold -> {
-                                    coroutineScope.launch {
-                                        animateOutCard(offsetX, offsetY, toRight = false) {
-                                            viewModel.incrementIndex()
-                                        }
-                                    }
-                                }
+                .statusBarsPadding()
+                .padding(start = 24.dp, top = (70 + 28).dp, end = 24.dp, bottom = (84 + 45).dp)
+                .zIndex(2f),
+            contentAlignment = Alignment.Center
+        ) {
+            nextPhoto?.let {
+                PhotoCardItem(
+                    photo = it,
+                    onNextClick = {},
+                    onBookmarkClick = {},
+                    onDetailClick = {},
+                )
+            }
 
-                                else -> {
-                                    coroutineScope.launch {
-                                        offsetX.animateTo(0f, tween(durationMillis = 300))
-                                        offsetY.animateTo(0f, tween(durationMillis = 300))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+                    .graphicsLayer { rotationZ = (offsetX.value / threshold) * 10f }
+                    .zIndex(2f)
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragEnd = {
+                                when {
+                                    // 오른쪽 스와이프
+                                    offsetX.value > threshold -> {
+                                        coroutineScope.launch {
+                                            viewModel.addBookmark(currentPhoto)
+                                            animateOutCard(offsetX, offsetY, toRight = true) {
+                                                viewModel.incrementIndex()
+                                            }
+                                        }
+                                    }
+                                    // 왼쪽 스와이프
+                                    offsetX.value < -threshold -> {
+                                        coroutineScope.launch {
+                                            animateOutCard(offsetX, offsetY, toRight = false) {
+                                                viewModel.incrementIndex()
+                                            }
+                                        }
+                                    }
+
+                                    else -> {
+                                        coroutineScope.launch {
+                                            offsetX.animateTo(0f, tween(durationMillis = 300))
+                                            offsetY.animateTo(0f, tween(durationMillis = 300))
+                                        }
                                     }
                                 }
                             }
-                        }
-                    ) { change, dragAmount ->
-                        change.consume()
-                        coroutineScope.launch {
-                            offsetX.snapTo(offsetX.value + dragAmount.x)
-                            offsetY.snapTo(offsetY.value + dragAmount.y)
+                        ) { change, dragAmount ->
+                            change.consume()
+                            coroutineScope.launch {
+                                offsetX.snapTo(offsetX.value + dragAmount.x)
+                                offsetY.snapTo(offsetY.value + dragAmount.y)
+                            }
                         }
                     }
-                }
-        ) {
+            ) {
 
-            PhotoCardItem(
-                photo = currentPhoto,
-                onNextClick = { viewModel.incrementIndex() },
-                onBookmarkClick = { photo ->
-                    if (!viewModel.isBookmarked(photo.id)) {
-                        viewModel.addBookmark(photo)
-                        viewModel.incrementIndex()
-                    }
-                    else {
-                        viewModel.deleteBookmark(photo)
-                    }
-                },
-                onDetailClick = { selectedPhotoId = it },
-            )
+                PhotoCardItem(
+                    photo = currentPhoto,
+                    onNextClick = { viewModel.incrementIndex() },
+                    onBookmarkClick = { photo ->
+                        if (!viewModel.isBookmarked(photo.id)) {
+                            viewModel.addBookmark(photo)
+                            viewModel.incrementIndex()
+                        } else {
+                            viewModel.deleteBookmark(photo)
+                        }
+                    },
+                    onDetailClick = { selectedPhotoId = it },
+                )
+            }
         }
+        BottomNavigation(
+            navController,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f)
+        )
     }
+
+
+
     selectedPhotoId?.let { photoId ->
         PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
     }
@@ -177,7 +197,8 @@ fun PhotoCardItem(
                     .weight(1f)
                     .background(Color.White)
             ) {
-                RandomPhotoItem(randomPhoto = photo) }
+                RandomPhotoItem(randomPhoto = photo)
+            }
             // 버튼 행
             Row(
                 modifier = Modifier
@@ -210,7 +231,9 @@ fun PhotoCardItem(
                         imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
                         contentDescription = "bookmark",
                         tint = Color.White,
-                        modifier = Modifier.size(32.dp).padding(1.dp)
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(1.dp)
                     )
                 }
 

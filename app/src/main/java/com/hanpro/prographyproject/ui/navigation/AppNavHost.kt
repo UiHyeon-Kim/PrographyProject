@@ -15,6 +15,6 @@ fun AppNavHost(navController: NavHostController) {
     ) {
         composable(NavigationItem.Home.route) { HomeScreen(navController = navController) }
 
-        composable(NavigationItem.RandomPhoto.route) { RandomPhotoScreen() }
+        composable(NavigationItem.RandomPhoto.route) { RandomPhotoScreen(navController = navController) }
     }
 }
