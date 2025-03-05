@@ -3,12 +3,31 @@
 
 ## 📝 Overview
 - **기간**: 2025.02.12 ~ 2025.02.21
-- **목적**: Unsplash Api를 활용한 이미지 뷰 애플리케이션
+- **설명**: Unsplash Api를 활용한 이미지 뷰 애플리케이션
 - **주요 기능**
   - Unsplash의 최신 이미지 조회 및 랜덤 이미지 조회
   - 이미지 북마크 및 다운로드 기능
+- **개발 중 목표**
+  - Room DB와 Retrofit을 다시 사용해보면서 익숙해지기
+  - Hilt 사용 전 후 비교하며 학습
+  - 완전 Compose한 앱 만들기
+  - 아키텍처 연습 MVVM + Clean Architecture
+  - 성능 개선 경험
+ 
+<!-- 앱 실행 화면 넣기 -->
+![HomeScreen](https://github.com/user-attachments/assets/f3b2e875-4fff-48c8-adb5-57c032e13342) ![randomScreen](https://github.com/user-attachments/assets/5a7e2498-048b-4986-85ce-83a135684145)
+
 
 </br>
+<!--
+## 📱How To Use
+1. [Unsplash developer](https://unsplash.com/developers) 회원가입 및 로그인
+2. [귀하의 앱 -> New Application] 에서 access key 발급
+3. 앱의 local.properties 에 `Unsplash_Api_Key="access key"` 작성
+
+</br>
+-->
+
 
 ## 🛠 Tech Stack & Libraries
 - **Language**: Kotlin  
@@ -74,6 +93,7 @@
   - [x] Accompanist Placeholder
   - [x] [shindonghwi-Skeleton View](https://github.com/shindonghwi/android_jetpack_compose_skeleton_view?source=post_page-----cef0ee2d2052---------------------------------------)
   - [ ] FaceBook Shimmer [(참고링크1)](https://reco-dy.tistory.com/7) [(참고링크2)](https://onlyfor-me-blog.tistory.com/792)
+  - [ ] [compose-shimmer](https://github.com/valentinilk/compose-shimmer)
 - RandomPhotoScreen
   - 좌측 스와이프 후, 우측 스와이프 시 이전 사진이 북마크 되는 오류.
 - 다운로드 기능 이미지 저장 안되는 오류
