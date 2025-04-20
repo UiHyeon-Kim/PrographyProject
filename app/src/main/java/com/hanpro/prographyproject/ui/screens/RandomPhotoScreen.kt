@@ -26,12 +26,18 @@ import coil.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.BottomNavigation
+import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
+import com.hanpro.prographyproject.ui.components.PrographyIconButton
 import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+/* TODO
+    드래그 제스처, 애니메이션 로직은 유지
+    재사용 가능한 포토 카드 아이템으로 분리
+ */
 @Composable
 fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
@@ -166,8 +172,6 @@ fun RandomPhotoScreen(
         )
     }
 
-
-
     selectedPhotoId?.let { photoId ->
         PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
     }
@@ -209,41 +213,43 @@ fun PhotoCardItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // 다음 사진 버튼
-                SideButton(
-                    content = "x",
-                    iconId = R.drawable.x,
-                    onClick = onNextClick
-                )
+                PrographyIconButton(
+                    onClick = { onNextClick() },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    PrographyButtonIcon(
+                        iconId = R.drawable.x,
+                        content = "back",
+                    )
+                }
                 Spacer(modifier = Modifier.width(32.dp))
 
                 // 북마크 버튼
-                IconButton(
-                    modifier = Modifier
-                        .width(72.dp)
-                        .height(72.dp)
-                        .background(
-                            color = Color(0xFFD81D45),
-                            shape = RoundedCornerShape(36.dp)
-                        ),
-                    onClick = { onBookmarkClick(photo) }
+                PrographyIconButton(
+                    onClick = { onBookmarkClick(photo) },
+                    modifier = Modifier.size(72.dp),
+                    buttonColor = MaterialTheme.colorScheme.primary,
+                    showBorder = false,
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
-                        contentDescription = "bookmark",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .padding(1.dp)
+                    PrographyButtonIcon(
+                        iconId = R.drawable.bookmark,
+                        content = "bookmark",
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(32.dp)
                     )
                 }
 
                 Spacer(modifier = Modifier.width(32.dp))
                 // 디테일 버튼
-                SideButton(
-                    content = "information",
-                    iconId = R.drawable.information,
-                    onClick = { onDetailClick(photo.id) }
-                )
+                PrographyIconButton(
+                    onClick = { onDetailClick(photo.id) },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    PrographyButtonIcon(
+                        iconId = R.drawable.information,
+                        content = "information",
+                    )
+                }
             }
         }
     }
@@ -263,28 +269,6 @@ fun RandomPhotoItem(randomPhoto: PhotoDetail) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black, shape = RoundedCornerShape(10.dp)),
-        )
-    }
-}
-
-@Composable
-fun SideButton(content: String, iconId: Int, onClick: () -> Unit) {
-    IconButton(
-        modifier = Modifier
-            .width(52.dp)
-            .height(52.dp)
-            .padding(8.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(36.dp))
-            .border(1.dp, Color(0xFFEAEBEF), shape = RoundedCornerShape(36.dp)),
-        onClick = onClick
-    ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(id = iconId),
-            contentDescription = content,
-            tint = Color(0xFFB3B3BE),
-            modifier = Modifier
-                .size(36.dp)
-                .padding(1.dp)
         )
     }
 }
