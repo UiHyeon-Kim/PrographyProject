@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,27 +62,27 @@ fun HomeScreen(
             }
     }
 
-    if (uiState.photos.isEmpty()) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = Color.LightGray,
-                strokeWidth = 4.dp,
-                progress = 1f
-            )
-
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = Color.Gray,
-                strokeWidth = 4.dp,
-            )
-        }
-    }
+//    if (uiState.photos.isEmpty()) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(16.dp),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            CircularProgressIndicator(
+//                modifier = Modifier.size(64.dp),
+//                color = Color.LightGray,
+//                strokeWidth = 4.dp,
+//                progress = 1f
+//            )
+//
+//            CircularProgressIndicator(
+//                modifier = Modifier.size(64.dp),
+//                color = Color.Gray,
+//                strokeWidth = 4.dp,
+//            )
+//        }
+//    }
 
     Scaffold(
         topBar = { TopBar() },
@@ -104,10 +105,13 @@ fun HomeScreen(
                         CategoryTitle(title = "북마크")
                     }
 
-                    if (uiState.photos.isNotEmpty()) {
+//                    if (uiState.photos.isNotEmpty()) {
                         item(span = StaggeredGridItemSpan.FullLine) {
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                                horizontalArrangement = Arrangement.spacedBy(
+                                    10.dp,
+                                    Alignment.Start
+                                ),
                                 verticalAlignment = Alignment.Top,
                             ) {
                                 itemsIndexed(
@@ -117,7 +121,8 @@ fun HomeScreen(
                                     Card(
                                         modifier = Modifier
                                             .height(128.dp)
-                                            .clickable { selectedPhotoId = bookmark.id }) {
+                                            .clickable { selectedPhotoId = bookmark.id }
+                                    ) {
                                         AsyncImage(
                                             model = bookmark.imageUrl,
                                             contentDescription = bookmark.description,
@@ -126,36 +131,38 @@ fun HomeScreen(
                                 }
                             }
                         }
-                    } else {
-                        item(span = StaggeredGridItemSpan.FullLine) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(64.dp),
-                                    color = Color.LightGray,
-                                    strokeWidth = 4.dp,
-                                    progress = 1f
-                                )
-
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(64.dp),
-                                    color = Color.Gray,
-                                    strokeWidth = 4.dp,
-                                )
-                            }
-                        }
-                    }
+//                    } else {
+//                        item(span = StaggeredGridItemSpan.FullLine) {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .padding(16.dp),
+//                                contentAlignment = Alignment.Center
+//                            ) {
+//                                CircularProgressIndicator(
+//                                    modifier = Modifier.size(64.dp),
+//                                    color = Color.LightGray,
+//                                    strokeWidth = 4.dp,
+//                                    progress = 1f
+//                                )
+//
+//                                CircularProgressIndicator(
+//                                    modifier = Modifier.size(64.dp),
+//                                    color = Color.Gray,
+//                                    strokeWidth = 4.dp,
+//                                )
+//                            }
+//                        }
+//                    }
                 }
 
                 item(span = StaggeredGridItemSpan.FullLine) {
                     CategoryTitle(title = "최신 이미지")
                 }
 
-                itemsIndexed(uiState.photos, key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
+                itemsIndexed(
+                    uiState.photos,
+                    key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
                     PhotoItem(
                         photo = photo,
                         onClick = { selectedPhotoId = photo.id }
@@ -175,7 +182,7 @@ fun HomeScreen(
 fun CategoryTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleLarge,
         modifier = Modifier
             .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
             .fillMaxWidth()
@@ -194,7 +201,7 @@ fun PhotoItem(
     ) {
         Box {
             AsyncImage(
-                model = photo.urls.small,
+                model = photo.urls.regular,
                 contentDescription = photo.description ?: "Photo",
                 modifier = Modifier.fillMaxWidth()
             )
@@ -202,7 +209,7 @@ fun PhotoItem(
             if (description.isNotEmpty()) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .align(Alignment.BottomStart)
                         .background(
                             brush = Brush.verticalGradient(
@@ -215,7 +222,7 @@ fun PhotoItem(
                 ) {
                     Text(
                         text = description,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.displayMedium,
                         color = Color.White,
                         maxLines = 2,
                         modifier = Modifier.padding(8.dp)

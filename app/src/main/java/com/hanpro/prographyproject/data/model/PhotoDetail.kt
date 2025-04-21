@@ -12,7 +12,6 @@ data class PhotoDetail(
 data class Urls(
     val full: String,
     val regular: String,
-    val small: String,
 )
 
 data class Tag(

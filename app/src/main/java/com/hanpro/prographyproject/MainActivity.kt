@@ -18,18 +18,6 @@ class MainActivity : ComponentActivity() {
             PrographyProjectTheme {
                 val navController = rememberNavController()
                 AppNavHost(navController)
-
-                /*Scaffold(
-                    topBar = { TopBar() },
-                    bottomBar = { BottomNavigation(navController) }
-                ) { innerPadding ->
-                    Surface(
-                        modifier = Modifier.padding(innerPadding),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        AppNavHost(navController)
-                    }
-                }*/
             }
         }
     }

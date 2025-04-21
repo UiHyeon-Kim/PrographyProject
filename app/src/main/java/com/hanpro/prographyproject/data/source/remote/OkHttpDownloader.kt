@@ -8,6 +8,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
+// TODO: 삭제 다른 기능으로 변경
 suspend fun downloadImage(
     imageUrl: String,
     imageFile: File,
