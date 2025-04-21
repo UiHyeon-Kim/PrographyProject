@@ -14,12 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.ui.navigation.NavigationItem
+import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
+// TODO: NavHostController를 분리하기
 @Composable
 fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     val navItems = listOf(
@@ -31,10 +35,6 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
 
     val systemUiController = rememberSystemUiController()
     systemUiController.setNavigationBarColor(Color(0xFF222222))
-    systemUiController.setStatusBarColor(
-        color = Color(0x00000000),
-        darkIcons = true
-    )
 
     NavigationBar(
         modifier = modifier.height(64.dp),
@@ -69,5 +69,14 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
         }
 
         Spacer(modifier = Modifier.width(32.dp))
+    }
+}
+
+@Preview
+@Composable
+fun BottomBarPreview() {
+    val navController = rememberNavController()
+    PrographyProjectTheme {
+        BottomNavigation(navController)
     }
 }
