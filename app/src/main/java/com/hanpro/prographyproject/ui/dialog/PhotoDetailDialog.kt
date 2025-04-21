@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -24,6 +25,10 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.remote.downloadImage
+import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
+import com.hanpro.prographyproject.ui.components.PrographyIconButton
+import com.hanpro.prographyproject.ui.components.PrographyNoBackgroundIconButton
+import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -74,6 +79,7 @@ fun PhotoDetailDialog(
                             .align(Alignment.Center)
                     ) { PhotoDetailContent(photo = photo) }
 
+                    // TODO: 함수 분리
                     DetailTopBar(
                         modifier = Modifier.align(Alignment.TopCenter),
                         userName = photo.user.username,
@@ -95,6 +101,7 @@ fun PhotoDetailDialog(
                         }
                     )
 
+                    // TODO 함수 분리
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -104,7 +111,7 @@ fun PhotoDetailDialog(
                         val description = photo.description ?: ""
                         Text(
                             text = photo.tags?.first()?.title ?: "",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge,
                             color = Color.White,
                             maxLines = 1
                         )
@@ -156,17 +163,16 @@ fun DetailTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 닫기 버튼
-            IconButton(
+            PrographyIconButton(
+                onClick = onClose,
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(24.dp))
-                    .border(1.dp, Color(0xFFEAEBEF), shape = RoundedCornerShape(24.dp)),
-                onClick = onClose
+                    .padding(8.dp)
+                    .size(36.dp)
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.x),
-                    contentDescription = "close",
-                    tint = Color.Black,
-                    modifier = Modifier.padding(1.dp)
+                PrographyButtonIcon(
+                    iconId = R.drawable.x,
+                    content = "close",
+                    tint = Color.Black
                 )
             }
 
@@ -174,7 +180,7 @@ fun DetailTopBar(
 
             Text(
                 text = userName,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 color = Color.White
             )
         }
@@ -182,28 +188,26 @@ fun DetailTopBar(
         // 오른쪽 열
         Row {
             // 다운로드 버튼
-            IconButton(
-                modifier = Modifier.size(40.dp),
-                onClick = { coroutineScope.launch { onDownloadClick() } },
+            PrographyNoBackgroundIconButton(
+                onClick = { coroutineScope.launch { onDownloadClick() } }
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.download),
                     contentDescription = "download",
-                    tint = Color.White,
+                    tint = Color.White
                 )
             }
 
             Spacer(modifier = Modifier.width(4.dp))
 
             // 북마크 버튼
-            IconButton(
-                modifier = Modifier.size(40.dp),
-                onClick = onBookmarkClick,
+            PrographyNoBackgroundIconButton(
+                onClick = onBookmarkClick
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
                     contentDescription = "bookmark",
-                    tint = if (isBookmarked) Color.White else Color.Gray,
+                    tint = if (isBookmarked) Color.White else Color.Gray
                 )
             }
         }
@@ -223,6 +227,18 @@ fun PhotoDetailContent(photo: PhotoDetail) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = Color.Transparent, shape = RoundedCornerShape(15.dp))
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PhotoDetailDialogPreview() {
+    PrographyProjectTheme {
+        PhotoDetailDialog(
+            photoId = "",
+            onClose = {},
+            viewModel = hiltViewModel()
         )
     }
 }

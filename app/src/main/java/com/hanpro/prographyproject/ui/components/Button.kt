@@ -46,6 +46,14 @@ fun PrographyIconButton(
 }
 
 @Composable
+fun PrographyNoBackgroundIconButton(
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit
+) {
+    IconButton(onClick = onClick) { icon() }
+}
+
+@Composable
 fun PrographyButtonIcon(
     iconId: Int,
     content: String,
