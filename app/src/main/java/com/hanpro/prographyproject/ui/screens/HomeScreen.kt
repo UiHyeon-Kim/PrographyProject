@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,9 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.BottomNavigation
+import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
@@ -62,27 +62,9 @@ fun HomeScreen(
             }
     }
 
-//    if (uiState.photos.isEmpty()) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(16.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            CircularProgressIndicator(
-//                modifier = Modifier.size(64.dp),
-//                color = Color.LightGray,
-//                strokeWidth = 4.dp,
-//                progress = 1f
-//            )
-//
-//            CircularProgressIndicator(
-//                modifier = Modifier.size(64.dp),
-//                color = Color.Gray,
-//                strokeWidth = 4.dp,
-//            )
-//        }
-//    }
+    if (uiState.photos.isEmpty()) {
+        PrographyProgressIndicator()
+    }
 
     Scaffold(
         topBar = { TopBar() },
@@ -105,7 +87,7 @@ fun HomeScreen(
                         CategoryTitle(title = "북마크")
                     }
 
-//                    if (uiState.photos.isNotEmpty()) {
+                    if (uiState.photos.isNotEmpty()) {
                         item(span = StaggeredGridItemSpan.FullLine) {
                             LazyRow(
                                 horizontalArrangement = Arrangement.spacedBy(
@@ -131,29 +113,11 @@ fun HomeScreen(
                                 }
                             }
                         }
-//                    } else {
-//                        item(span = StaggeredGridItemSpan.FullLine) {
-//                            Box(
-//                                modifier = Modifier
-//                                    .fillMaxSize()
-//                                    .padding(16.dp),
-//                                contentAlignment = Alignment.Center
-//                            ) {
-//                                CircularProgressIndicator(
-//                                    modifier = Modifier.size(64.dp),
-//                                    color = Color.LightGray,
-//                                    strokeWidth = 4.dp,
-//                                    progress = 1f
-//                                )
-//
-//                                CircularProgressIndicator(
-//                                    modifier = Modifier.size(64.dp),
-//                                    color = Color.Gray,
-//                                    strokeWidth = 4.dp,
-//                                )
-//                            }
-//                        }
-//                    }
+                    } else {
+                        item(span = StaggeredGridItemSpan.FullLine) {
+                            PrographyProgressIndicator()
+                        }
+                    }
                 }
 
                 item(span = StaggeredGridItemSpan.FullLine) {

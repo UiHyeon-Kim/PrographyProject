@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -19,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.ui.navigation.NavigationItem
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
@@ -35,7 +35,7 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
 
     NavigationBar(
         modifier = modifier.height(64.dp),
-        containerColor = Color(0xFF222222),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Spacer(modifier = Modifier.width(32.dp))
 

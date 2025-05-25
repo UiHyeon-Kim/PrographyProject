@@ -14,20 +14,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.BottomNavigation
 import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
 import com.hanpro.prographyproject.ui.components.PrographyIconButton
+import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
@@ -60,20 +59,7 @@ fun RandomPhotoScreen(
 
     if (uiState.randomPhotos.isEmpty()) {
         LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = Color.LightGray,
-                strokeWidth = 4.dp,
-                progress = 1f
-            )
-
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                color = Color.Gray,
-                strokeWidth = 4.dp,
-            )
-        }
+        PrographyProgressIndicator()
         return
     }
 

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
@@ -28,6 +28,7 @@ import com.hanpro.prographyproject.data.source.remote.downloadImage
 import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
 import com.hanpro.prographyproject.ui.components.PrographyIconButton
 import com.hanpro.prographyproject.ui.components.PrographyNoBackgroundIconButton
+import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.launch
@@ -66,7 +67,7 @@ fun PhotoDetailDialog(
                 .background(Color.Black.copy(alpha = 0.7f))
         ) {
             if (uiState.isLoading) {
-                CircularProgressIndicator()
+                PrographyProgressIndicator()
             } else if (uiState.error != null) {
                 Log.e("PhotoDetailScreen", "Error: ${uiState.error}")
             } else {
