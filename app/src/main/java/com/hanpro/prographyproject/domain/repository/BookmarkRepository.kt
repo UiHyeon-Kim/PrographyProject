@@ -13,5 +13,4 @@ class BookmarkRepository @Inject constructor(
     suspend fun addBookmark(bookmark: Bookmark) = bookmarkDao.insertBookmark(bookmark)
 
     suspend fun deleteBookmark(bookmark: Bookmark) = bookmarkDao.deleteBookmark(bookmark)
-
 }

@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.hanpro.prographyproject.ui.navigation.NavigationItem.Home
+import com.hanpro.prographyproject.ui.navigation.NavigationItem.RandomPhoto
 import com.hanpro.prographyproject.ui.screens.HomeScreen
 import com.hanpro.prographyproject.ui.screens.RandomPhotoScreen
 
@@ -11,10 +13,9 @@ import com.hanpro.prographyproject.ui.screens.RandomPhotoScreen
 fun AppNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = NavigationItem.Home.route
+        startDestination = Home.route
     ) {
-        composable(NavigationItem.Home.route) { HomeScreen(navController = navController) }
-
-        composable(NavigationItem.RandomPhoto.route) { RandomPhotoScreen(navController = navController) }
+        composable(Home.route) { HomeScreen(navController = navController) }
+        composable(RandomPhoto.route) { RandomPhotoScreen(navController = navController) }
     }
 }

@@ -1,7 +1,7 @@
 package com.hanpro.prographyproject.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -29,20 +29,14 @@ fun TopBar(modifier: Modifier = Modifier) {
                     .height(64.dp)
             )
         }
-
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(color = Color(0xFFEAEBEF))
-        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun TopBarPreview() {
     PrographyProjectTheme {
-        TopBar(modifier = Modifier.background(MaterialTheme.colorScheme.secondary))
+        TopBar()
     }
 }

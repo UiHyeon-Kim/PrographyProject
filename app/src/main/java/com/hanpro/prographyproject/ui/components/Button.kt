@@ -29,10 +29,7 @@ fun PrographyIconButton(
         onClick = onClick,
         modifier = modifier
             .size(52.dp)
-            .background(
-                color = buttonColor,
-                shape = CircleShape,
-            )
+            .background(color = buttonColor, shape = CircleShape)
             .then(
                 if (showBorder) Modifier.border(
                     width = 1.dp,

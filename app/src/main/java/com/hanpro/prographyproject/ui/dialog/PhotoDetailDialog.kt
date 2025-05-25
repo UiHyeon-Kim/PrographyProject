@@ -157,12 +157,10 @@ fun DetailTopBar(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 왼쪽 열
-        Row(
+        Row( // 왼쪽 열
             modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 닫기 버튼
             PrographyIconButton(
                 onClick = onClose,
                 modifier = Modifier
@@ -175,7 +173,6 @@ fun DetailTopBar(
                     tint = Color.Black
                 )
             }
-
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
@@ -185,9 +182,8 @@ fun DetailTopBar(
             )
         }
 
-        // 오른쪽 열
-        Row {
-            // 다운로드 버튼
+
+        Row { // 오른쪽 열
             PrographyNoBackgroundIconButton(
                 onClick = { coroutineScope.launch { onDownloadClick() } }
             ) {
@@ -197,10 +193,8 @@ fun DetailTopBar(
                     tint = Color.White
                 )
             }
-
             Spacer(modifier = Modifier.width(4.dp))
 
-            // 북마크 버튼
             PrographyNoBackgroundIconButton(
                 onClick = onBookmarkClick
             ) {

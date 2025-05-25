@@ -33,9 +33,6 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val systemUiController = rememberSystemUiController()
-    systemUiController.setNavigationBarColor(Color(0xFF222222))
-
     NavigationBar(
         modifier = modifier.height(64.dp),
         containerColor = Color(0xFF222222),
