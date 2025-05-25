@@ -67,7 +67,8 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
 
     // coil - 이미지 로더
-    implementation(libs.coil.compose)
+    implementation(libs.coil3.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // Hilt
     implementation(libs.hilt.android)
