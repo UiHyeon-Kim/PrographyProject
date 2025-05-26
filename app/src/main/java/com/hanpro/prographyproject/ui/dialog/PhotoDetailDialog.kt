@@ -1,8 +1,13 @@
 package com.hanpro.prographyproject.ui.dialog
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -19,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -44,6 +50,14 @@ fun PhotoDetailDialog(
     val context = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        if (!it) {
+            Toast.makeText(context, "저장 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(photoId) {
         viewModel.loadPhotoDetail(photoId)
@@ -87,13 +101,16 @@ fun PhotoDetailDialog(
                         isBookmarked = uiState.isBookmarked,
                         onClose = onClose,
                         onDownloadClick = {
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                return@DetailTopBar
+                            }
                             val fileName = "${photo.id}.jpg"
-                            val imageFile = File(
-                                context.getExternalFilesDir(Environment.DIRECTORY_DCIM),
-                                fileName
-                            )
-                            val success = downloadImage(photo.links.download, imageFile)
-                            if(success) Toast.makeText(context, "이미지를 저장했습니다.", Toast.LENGTH_SHORT).show()
+                            val success = downloadImage(photo.links.download, fileName)
+                            if (success) Toast.makeText(context, "이미지를 저장했습니다.", Toast.LENGTH_SHORT).show()
                             else Toast.makeText(context, "이미지를 저장하지 못했습니다.", Toast.LENGTH_SHORT).show()
                         },
                         onBookmarkClick = {
