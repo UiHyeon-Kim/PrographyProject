@@ -85,21 +85,3 @@
 
 </br>
 
-## 🔍 Improvements
-- HomeScreen 북마크 이미지 LazyVerticalStaggeredGrid의 padding에 가려지지 않도록 하기
-  - [x] LazyColumn + LazyVerticalStaggeredGrid 크래시.
-  - [ ] 해결법 모색 필요
-- 스켈레톤 뷰
-  - [x] Accompanist Placeholder
-  - [x] [shindonghwi-Skeleton View](https://github.com/shindonghwi/android_jetpack_compose_skeleton_view?source=post_page-----cef0ee2d2052---------------------------------------)
-  - [ ] FaceBook Shimmer [(참고링크1)](https://reco-dy.tistory.com/7) [(참고링크2)](https://onlyfor-me-blog.tistory.com/792)
-  - [ ] [compose-shimmer](https://github.com/valentinilk/compose-shimmer)
-- RandomPhotoScreen
-  - 좌측 스와이프 후, 우측 스와이프 시 이전 사진이 북마크 되는 오류.
-- 다운로드 기능 이미지 저장 안되는 오류
-  - [x] [DownloadManager](https://developer.android.com/reference/android/app/DownloadManager): [보안관련 문제](https://developer.android.com/privacy-and-security/risks/unsafe-download-manager?hl=ko)
-  - [x] OkHttp: 다른 링크를 넣었을 땐 오류. 다운로드 링크 넣었을 땐 통신 성공 but, 저장되진 않음
-  - [ ] [Cronet](https://developer.android.com/develop/connectivity/cronet?hl=ko): DownloadManager 보완
-- 백 버튼 딜레이
-  - 백 버튼 2번 누를 경우 나가지도록 딜레이 넣기
-
