@@ -3,13 +3,11 @@ package com.hanpro.prographyproject.ui.dialog
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -30,7 +28,8 @@ import coil3.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.data.source.remote.downloadImage
+import com.hanpro.prographyproject.data.source.remote.downloadMediaStore
+import com.hanpro.prographyproject.data.source.remote.downloadPublicDCIM
 import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
 import com.hanpro.prographyproject.ui.components.PrographyIconButton
 import com.hanpro.prographyproject.ui.components.PrographyNoBackgroundIconButton
@@ -38,7 +37,6 @@ import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 
 @Composable
 fun PhotoDetailDialog(
@@ -109,7 +107,11 @@ fun PhotoDetailDialog(
                                 return@DetailTopBar
                             }
                             val fileName = "${photo.id}.jpg"
-                            val success = downloadImage(photo.links.download, fileName)
+                            val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                downloadMediaStore(context, photo.links.download, fileName)
+                            } else {
+                                downloadPublicDCIM(photo.links.download, fileName)
+                            }
                             if (success) Toast.makeText(context, "이미지를 저장했습니다.", Toast.LENGTH_SHORT).show()
                             else Toast.makeText(context, "이미지를 저장하지 못했습니다.", Toast.LENGTH_SHORT).show()
                         },
