@@ -39,32 +39,28 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
     ) {
         Spacer(modifier = Modifier.width(32.dp))
 
-        navItems.forEach { item ->
-            val isSelected = currentRoute == item.route
+        navItems.forEach { screen ->
+            val isSelected = currentRoute == screen.route
             NavigationBarItem(
                 icon = {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = item.icon),
-                        contentDescription = item.title,
+                        imageVector = ImageVector.vectorResource(id = screen.icon!!),
+                        contentDescription = screen.title,
                         tint = if (isSelected) Color.White else Color.Gray,
                         modifier = Modifier.size(26.dp)
                     )
                 },
                 selected = isSelected,
                 onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    if (!isSelected) {
+                        navController.navigate(screen.route) {
+                            popUpTo(currentRoute!!) { inclusive = true }
                             launchSingleTop = true
                         }
                     }
                 },
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = Color.Transparent
-                )
             )
         }
-
         Spacer(modifier = Modifier.width(32.dp))
     }
 }
