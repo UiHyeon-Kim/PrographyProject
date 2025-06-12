@@ -17,39 +17,29 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.ui.components.BottomNavigation
 import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
 import com.hanpro.prographyproject.ui.components.PrographyIconButton
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
-import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/* TODO
-    드래그 제스처, 애니메이션 로직은 유지
-    재사용 가능한 포토 카드 아이템으로 분리
- */
 @Composable
 fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
-    navController: NavHostController
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+
     var currentIndex = uiState.randomPhotoIndex
-    var offsetX = remember { Animatable(0f) }
-    var offsetY = remember { Animatable(0f) }
-    val threshold = 200f
 
     LaunchedEffect(currentIndex) {
         if (currentIndex >= uiState.randomPhotos.size - 2) {
@@ -67,95 +57,48 @@ fun RandomPhotoScreen(
     val nextPhoto = uiState.randomPhotos.getOrNull(currentIndex + 1)
 
     Box(modifier = Modifier.fillMaxSize()) {
-        TopBar(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .zIndex(1f)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(start = 24.dp, top = (70 + 28).dp, end = 24.dp, bottom = (84 + 45).dp)
-                .zIndex(2f),
-            contentAlignment = Alignment.Center
+        Popup(
+            properties = PopupProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnClickOutside = false,
+                focusable = false
+            ),
+            alignment = Alignment.TopStart,
         ) {
-            nextPhoto?.let {
-                PhotoCardItem(
-                    photo = it,
-                    onNextClick = {},
-                    onBookmarkClick = {},
-                    onDetailClick = {},
-                )
-            }
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
-                    .graphicsLayer { rotationZ = (offsetX.value / threshold) * 10f }
-                    .zIndex(2f)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragEnd = {
-                                when {
-                                    // 오른쪽 스와이프
-                                    offsetX.value > threshold -> {
-                                        coroutineScope.launch {
-                                            viewModel.addBookmark(currentPhoto)
-                                            animateOutCard(offsetX, offsetY, toRight = true) {
-                                                viewModel.incrementIndex()
-                                            }
-                                        }
-                                    }
-                                    // 왼쪽 스와이프
-                                    offsetX.value < -threshold -> {
-                                        coroutineScope.launch {
-                                            animateOutCard(offsetX, offsetY, toRight = false) {
-                                                viewModel.incrementIndex()
-                                            }
-                                        }
-                                    }
-
-                                    else -> {
-                                        coroutineScope.launch {
-                                            offsetX.animateTo(0f, tween(durationMillis = 300))
-                                            offsetY.animateTo(0f, tween(durationMillis = 300))
-                                        }
-                                    }
-                                }
-                            }
-                        ) { change, dragAmount ->
-                            change.consume()
-                            coroutineScope.launch {
-                                offsetX.snapTo(offsetX.value + dragAmount.x)
-                                offsetY.snapTo(offsetY.value + dragAmount.y)
-                            }
-                        }
-                    }
+                    .statusBarsPadding()
+                    .padding(start = 24.dp, top = (70 + 28).dp, end = 24.dp, bottom = (84 + 45).dp)
+                    .zIndex(2f),
+                contentAlignment = Alignment.Center
             ) {
-
-                PhotoCardItem(
-                    photo = currentPhoto,
-                    onNextClick = { viewModel.incrementIndex() },
-                    onBookmarkClick = { photo ->
-                        if (!viewModel.isBookmarked(photo.id)) {
-                            viewModel.addBookmark(photo)
-                            viewModel.incrementIndex()
-                        } else {
-                            viewModel.deleteBookmark(photo)
-                        }
-                    },
-                    onDetailClick = { selectedPhotoId = it },
-                )
+                nextPhoto?.let {
+                    PhotoCardItem(
+                        photo = it,
+                        onNextClick = {},
+                        onBookmarkClick = {},
+                        onDetailClick = {},
+                    )
+                }
+                CardAnimation(currentPhoto = currentPhoto) {
+                    PhotoCardItem(
+                        photo = currentPhoto,
+                        onNextClick = { viewModel.incrementIndex() },
+                        onBookmarkClick = { photo ->
+                            if (!viewModel.isBookmarked(photo.id)) {
+                                viewModel.addBookmark(photo)
+                                viewModel.incrementIndex()
+                            } else {
+                                viewModel.deleteBookmark(photo)
+                            }
+                        },
+                        onDetailClick = { selectedPhotoId = it },
+                    )
+                }
             }
         }
-        BottomNavigation(
-            navController,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .zIndex(1f)
-        )
     }
 
     selectedPhotoId?.let { photoId ->
@@ -175,12 +118,15 @@ fun PhotoCardItem(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White, shape = RoundedCornerShape(15.dp))
-            .border(width = 1.dp, color = Color(0xFFEAEBEF), shape = RoundedCornerShape(15.dp)),
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(15.dp)
+            ),
         shape = RoundedCornerShape(15.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
     ) {
         Column(modifier = Modifier.background(Color.Transparent)) {
-            // 이미지 겹치기 위한 박스
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -220,7 +166,7 @@ fun PhotoCardItem(
                     PrographyButtonIcon(
                         iconId = R.drawable.bookmark,
                         content = "bookmark",
-                        tint = MaterialTheme.colorScheme.secondary,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -259,11 +205,69 @@ fun RandomPhotoItem(randomPhoto: PhotoDetail) {
     }
 }
 
+@Composable
+fun CardAnimation(
+    currentPhoto: PhotoDetail,
+    viewModel: PhotoViewModel = hiltViewModel(),
+    content: @Composable () -> Unit,
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    var offsetX = remember { Animatable(0f) }
+    var offsetY = remember { Animatable(0f) }
+    val threshold = 200f
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+            .graphicsLayer { rotationZ = (offsetX.value / threshold) * 10f }
+            .zIndex(2f)
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragEnd = {
+                        when {
+                            offsetX.value > threshold -> { // 오른쪽 스와이프
+                                coroutineScope.launch {
+                                    viewModel.addBookmark(currentPhoto)
+                                    animateOutCard(offsetX, offsetY, toRight = true) {
+                                        viewModel.incrementIndex()
+                                    }
+                                }
+                            }
+
+                            offsetX.value < -threshold -> { // 왼쪽 스와이프
+                                coroutineScope.launch {
+                                    animateOutCard(offsetX, offsetY, toRight = false) {
+                                        viewModel.incrementIndex()
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                coroutineScope.launch {
+                                    offsetX.animateTo(0f, tween(durationMillis = 300))
+                                    offsetY.animateTo(0f, tween(durationMillis = 300))
+                                }
+                            }
+                        }
+                    }
+                ) { change, dragAmount ->
+                    change.consume()
+                    coroutineScope.launch {
+                        offsetX.snapTo(offsetX.value + dragAmount.x)
+                        offsetY.snapTo(offsetY.value + dragAmount.y)
+                    }
+                }
+            }
+    ) { content() }
+}
+
 suspend fun animateOutCard(
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
     toRight: Boolean,
-    onComplete: () -> Unit
+    onComplete: () -> Unit,
 ) {
     val targetX = if (toRight) 1000f else -1000f
     offsetX.animateTo(targetValue = targetX, animationSpec = tween(durationMillis = 300))
