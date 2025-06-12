@@ -17,13 +17,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import coil3.compose.AsyncImage
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.ui.components.BottomNavigation
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
-import com.hanpro.prographyproject.ui.components.TopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -33,14 +29,12 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
-    navController: NavHostController,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
     val gridState = rememberLazyStaggeredGridState()
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(currentBackStackEntry) { viewModel.loadLatestPhotos(page = 1) }
+    LaunchedEffect(Unit) { viewModel.loadLatestPhotos(page = 1) }
 
     // 무한 스크롤
     LaunchedEffect(gridState) {
@@ -66,80 +60,77 @@ fun HomeScreen(
         PrographyProgressIndicator()
     }
 
-    Scaffold(
-        topBar = { TopBar() },
-        bottomBar = { BottomNavigation(navController) }
-    ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(innerPadding),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            LazyVerticalStaggeredGrid(
-                state = gridState,
-                columns = StaggeredGridCells.Fixed(2),
-                verticalItemSpacing = 10.dp,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                modifier = Modifier.fillMaxSize(),
-            ) {
-                if (uiState.bookmarks.isNotEmpty()) {
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        CategoryTitle(title = "북마크")
-                    }
 
-                    if (uiState.photos.isNotEmpty()) {
-                        item(span = StaggeredGridItemSpan.FullLine) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(
-                                    10.dp,
-                                    Alignment.Start
-                                ),
-                                verticalAlignment = Alignment.Top,
-                            ) {
-                                itemsIndexed(
-                                    items = uiState.bookmarks,
-                                    key = { index, bookmark -> "${bookmark.id}_$index" },
-                                ) { _, bookmark ->
-                                    Card(
-                                        modifier = Modifier
-                                            .height(128.dp)
-                                            .clickable { selectedPhotoId = bookmark.id }
-                                    ) {
-                                        AsyncImage(
-                                            model = bookmark.imageUrl,
-                                            contentDescription = bookmark.description,
-                                        )
-                                    }
+    Surface(
+        modifier = Modifier.padding(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        LazyVerticalStaggeredGrid(
+            state = gridState,
+            columns = StaggeredGridCells.Fixed(2),
+            verticalItemSpacing = 10.dp,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            if (uiState.bookmarks.isNotEmpty()) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    CategoryTitle(title = "북마크")
+                }
+
+                if (uiState.photos.isNotEmpty()) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                10.dp,
+                                Alignment.Start
+                            ),
+                            verticalAlignment = Alignment.Top,
+                        ) {
+                            itemsIndexed(
+                                items = uiState.bookmarks,
+                                key = { index, bookmark -> "${bookmark.id}_$index" },
+                            ) { _, bookmark ->
+                                Card(
+                                    modifier = Modifier
+                                        .height(128.dp)
+                                        .clickable { selectedPhotoId = bookmark.id }
+                                ) {
+                                    AsyncImage(
+                                        model = bookmark.imageUrl,
+                                        contentDescription = bookmark.description,
+                                    )
                                 }
                             }
                         }
-                    } else {
-                        item(span = StaggeredGridItemSpan.FullLine) {
-                            PrographyProgressIndicator()
-                        }
+                    }
+                } else {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        PrographyProgressIndicator()
                     }
                 }
-
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    CategoryTitle(title = "최신 이미지")
-                }
-
-                itemsIndexed(
-                    uiState.photos,
-                    key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
-                    PhotoItem(
-                        photo = photo,
-                        onClick = { selectedPhotoId = photo.id }
-                    )
-                }
             }
 
-            // 상태 호이스팅
-            selectedPhotoId?.let { photoId ->
-                PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
+            item(span = StaggeredGridItemSpan.FullLine) {
+                CategoryTitle(title = "최신 이미지")
+            }
+
+            itemsIndexed(
+                uiState.photos,
+                key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
+                PhotoItem(
+                    photo = photo,
+                    onClick = { selectedPhotoId = photo.id }
+                )
             }
         }
+
+        // 상태 호이스팅
+        selectedPhotoId?.let { photoId ->
+            PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
+        }
     }
+
 }
 
 @Composable
@@ -156,7 +147,7 @@ fun CategoryTitle(title: String) {
 @Composable
 fun PhotoItem(
     photo: PhotoDetail,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = Modifier
