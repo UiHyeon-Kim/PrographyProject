@@ -3,7 +3,6 @@
 package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,12 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
-import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.ui.components.CategoryTitle
+import com.hanpro.prographyproject.ui.components.PhotoItem
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
@@ -128,62 +126,6 @@ fun HomeScreen(
         // 상태 호이스팅
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
-        }
-    }
-
-}
-
-@Composable
-fun CategoryTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier
-            .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
-            .fillMaxWidth()
-    )
-}
-
-@Composable
-fun PhotoItem(
-    photo: PhotoDetail,
-    onClick: () -> Unit,
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-    ) {
-        Box {
-            AsyncImage(
-                model = photo.urls.regular,
-                contentDescription = photo.description ?: "Photo",
-                modifier = Modifier.fillMaxWidth()
-            )
-            val description = photo.description ?: ""
-            if (description.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.BottomStart)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.2f)
-                                )
-                            )
-                        )
-                ) {
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.displayMedium,
-                        color = Color.White,
-                        maxLines = 2,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
         }
     }
 }
