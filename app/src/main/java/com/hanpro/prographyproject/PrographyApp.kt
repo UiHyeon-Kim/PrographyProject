@@ -12,7 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.hanpro.prographyproject.ui.components.BottomNavigation
-import com.hanpro.prographyproject.ui.components.TopBar
+import com.hanpro.prographyproject.ui.components.PrographyTopBar
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.navigation.AppNavigation
 import com.hanpro.prographyproject.ui.navigation.NavigationItem.DetailPhoto
@@ -28,7 +28,7 @@ fun PrographyApp() {
 
     CompositionLocalProvider(LocalNavigation provides appNavigation) {
         Scaffold(
-            topBar = { TopBar() },
+            topBar = { PrographyTopBar() },
             bottomBar = { BottomNavigation(navController) }
         ) { innerPadding ->
             NavHost(

@@ -9,34 +9,26 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.hanpro.prographyproject.R
-import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.remote.downloadMediaStore
 import com.hanpro.prographyproject.data.source.remote.downloadPublicDCIM
-import com.hanpro.prographyproject.ui.components.PrographyButtonIcon
-import com.hanpro.prographyproject.ui.components.PrographyIconButton
-import com.hanpro.prographyproject.ui.components.PrographyNoBackgroundIconButton
+import com.hanpro.prographyproject.ui.components.DetailTopBar
+import com.hanpro.prographyproject.ui.components.PhotoDetailContent
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun PhotoDetailDialog(
@@ -157,91 +149,6 @@ fun PhotoDetailDialog(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun DetailTopBar(
-    modifier: Modifier,
-    userName: String = "",
-    isBookmarked: Boolean,
-    onClose: () -> Unit,
-    onDownloadClick: suspend () -> Unit,
-    onBookmarkClick: () -> Unit,
-) {
-    val coroutineScope = rememberCoroutineScope()
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row( // 왼쪽 열
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PrographyIconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(36.dp)
-            ) {
-                PrographyButtonIcon(
-                    iconId = R.drawable.x,
-                    content = "close",
-                    tint = Color.Black
-                )
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Text(
-                text = userName,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White
-            )
-        }
-
-
-        Row { // 오른쪽 열
-            PrographyNoBackgroundIconButton(
-                onClick = { coroutineScope.launch { onDownloadClick() } }
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.download),
-                    contentDescription = "download",
-                    tint = Color.White
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-
-            PrographyNoBackgroundIconButton(
-                onClick = onBookmarkClick
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.bookmark),
-                    contentDescription = "bookmark",
-                    tint = if (isBookmarked) Color.White else Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun PhotoDetailContent(photo: PhotoDetail) {
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .background(color = Color.Transparent, shape = RoundedCornerShape(15.dp))
-    ) {
-        AsyncImage(
-            model = photo.urls.regular,
-            contentDescription = photo.description ?: "Photo",
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Transparent, shape = RoundedCornerShape(15.dp))
-        )
     }
 }
 
