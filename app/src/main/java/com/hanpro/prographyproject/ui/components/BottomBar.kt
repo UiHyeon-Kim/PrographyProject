@@ -59,6 +59,9 @@ fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modi
                         }
                     }
                 },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent
+                )
             )
         }
         Spacer(modifier = Modifier.width(32.dp))
