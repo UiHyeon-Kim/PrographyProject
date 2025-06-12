@@ -115,7 +115,5 @@ class PhotoViewModel @Inject constructor(
         }
     }
 
-    fun isBookmarked(photoId: String): Boolean {
-        return _uiState.value.bookmarks.any { it.id == photoId }
-    }
+    fun isBookmarked(photoId: String): Boolean = _uiState.value.bookmarks.any { it.id == photoId }
 }

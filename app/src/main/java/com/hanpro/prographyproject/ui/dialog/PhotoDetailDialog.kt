@@ -40,8 +40,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PhotoDetailDialog(
-    photoId: String,
     onClose: () -> Unit,
+    photoId: String = "",
     viewModel: PhotoDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -106,14 +106,14 @@ fun PhotoDetailDialog(
                                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                 return@DetailTopBar
                             }
-                            val fileName = "${photo.id}.jpg"
+                            val fileName = "unsplash_${photo.id}.jpg"
                             val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 downloadMediaStore(context, photo.links.download, fileName)
                             } else {
                                 downloadPublicDCIM(photo.links.download, fileName)
                             }
-                            if (success) Toast.makeText(context, "이미지를 저장했습니다.", Toast.LENGTH_SHORT).show()
-                            else Toast.makeText(context, "이미지를 저장하지 못했습니다.", Toast.LENGTH_SHORT).show()
+                            val msg = if (success) "이미지를 저장했습니다." else "이미지를 저장하지 못했습니다."
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         },
                         onBookmarkClick = {
                             if (!uiState.isBookmarked) viewModel.addBookmark(photo)
