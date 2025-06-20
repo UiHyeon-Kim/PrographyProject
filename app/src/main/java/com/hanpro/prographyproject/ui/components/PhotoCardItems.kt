@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.hanpro.prographyproject.R
 import com.hanpro.prographyproject.data.model.PhotoDetail
@@ -50,7 +52,15 @@ fun PhotoCardItems(
                     .weight(1f)
                     .background(Color.White)
             ) {
-                RandomPhotoItem(randomPhoto = photo)
+                PhotoCard(
+                    imageUrl = photo.urls.regular,
+                    imageModifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onSurface, RoundedCornerShape(10.dp)),
+                    cardModifier = Modifier
+                        .padding(start = 12.dp, top = 12.dp, end = 12.dp),
+                    contentScale = ContentScale.FillWidth
+                )
             }
             // 버튼 행
             Row(
