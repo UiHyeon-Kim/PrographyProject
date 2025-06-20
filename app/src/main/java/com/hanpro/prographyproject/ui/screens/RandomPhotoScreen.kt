@@ -51,7 +51,6 @@ fun RandomPhotoScreen(
                 onNextClick = {},
                 onBookmarkClick = {},
                 onDetailClick = {},
-                modifier = Modifier.fillMaxSize()
             )
         }
         PhotoCardAnimation(currentPhoto = currentPhoto) {

@@ -23,7 +23,6 @@ import androidx.navigation.compose.rememberNavController
 import com.hanpro.prographyproject.ui.navigation.NavigationItem
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
-// TODO: NavHostController를 분리하기
 @Composable
 fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     val navItems = listOf(
