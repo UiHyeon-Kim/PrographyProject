@@ -3,7 +3,6 @@
 package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -14,9 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.compose.AsyncImage
 import com.hanpro.prographyproject.ui.components.CategoryTitle
-import com.hanpro.prographyproject.ui.components.PhotoItem
+import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
@@ -89,16 +87,11 @@ fun HomeScreen(
                                 items = uiState.bookmarks,
                                 key = { index, bookmark -> "${bookmark.id}_$index" },
                             ) { _, bookmark ->
-                                Card(
-                                    modifier = Modifier
-                                        .height(128.dp)
-                                        .clickable { selectedPhotoId = bookmark.id }
-                                ) {
-                                    AsyncImage(
-                                        model = bookmark.imageUrl,
-                                        contentDescription = bookmark.description,
-                                    )
-                                }
+                                PhotoCard(
+                                    cardModifier = Modifier.height(128.dp),
+                                    imageUrl = bookmark.imageUrl,
+                                    onClick = { selectedPhotoId = bookmark.id },
+                                )
                             }
                         }
                     }
@@ -116,9 +109,10 @@ fun HomeScreen(
             itemsIndexed(
                 uiState.photos,
                 key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
-                PhotoItem(
-                    photo = photo,
-                    onClick = { selectedPhotoId = photo.id }
+                PhotoCard(
+                    imageUrl = photo.urls.regular,
+                    photoDescription = photo.description,
+                    onClick = { selectedPhotoId = photo.id },
                 )
             }
         }
