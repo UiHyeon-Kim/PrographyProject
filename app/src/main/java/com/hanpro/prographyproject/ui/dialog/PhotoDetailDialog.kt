@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -25,7 +26,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.data.source.remote.downloadMediaStore
 import com.hanpro.prographyproject.data.source.remote.downloadPublicDCIM
 import com.hanpro.prographyproject.ui.components.DetailTopBar
-import com.hanpro.prographyproject.ui.components.PhotoDetailContent
+import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
@@ -82,7 +83,12 @@ fun PhotoDetailDialog(
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp)
                             .align(Alignment.Center)
-                    ) { PhotoDetailContent(photo = photo) }
+                    ) {
+                        PhotoCard(
+                            imageUrl = photo.urls.regular,
+                            contentScale = ContentScale.FillWidth
+                        )
+                    }
 
                     // TODO: 함수 분리
                     DetailTopBar(
