@@ -33,8 +33,8 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 
 @Composable
 fun PhotoDetailDialog(
-    onClose: () -> Unit,
     photoId: String = "",
+    onClose: () -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()

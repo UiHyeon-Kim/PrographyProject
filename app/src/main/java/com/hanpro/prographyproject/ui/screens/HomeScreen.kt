@@ -117,7 +117,6 @@ fun HomeScreen(
             }
         }
 
-        // 상태 호이스팅
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
         }
