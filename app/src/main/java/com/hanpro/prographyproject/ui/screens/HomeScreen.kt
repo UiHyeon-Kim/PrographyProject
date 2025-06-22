@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hanpro.prographyproject.ui.components.CategoryTitle
@@ -56,7 +57,6 @@ fun HomeScreen(
         PrographyProgressIndicator()
     }
 
-
     Surface(
         modifier = Modifier.padding(),
         color = MaterialTheme.colorScheme.background
@@ -91,6 +91,7 @@ fun HomeScreen(
                                     cardModifier = Modifier.height(128.dp),
                                     imageUrl = bookmark.imageUrl,
                                     onClick = { selectedPhotoId = bookmark.id },
+                                    contentScale = ContentScale.FillHeight
                                 )
                             }
                         }
