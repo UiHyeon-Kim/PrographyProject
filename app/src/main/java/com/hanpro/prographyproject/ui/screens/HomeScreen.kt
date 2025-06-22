@@ -4,16 +4,19 @@ package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.ui.components.CategoryTitle
 import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
@@ -30,8 +33,12 @@ fun HomeScreen(
     val gridState = rememberLazyStaggeredGridState()
     val uiState by viewModel.uiState.collectAsState()
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+    val systemUiController = rememberSystemUiController()
 
-    LaunchedEffect(Unit) { viewModel.loadLatestPhotos(page = 1) }
+    LaunchedEffect(Unit) {
+        viewModel.loadLatestPhotos(page = 1)
+        systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
+    }
 
     // 무한 스크롤
     LaunchedEffect(gridState) {
@@ -57,67 +64,55 @@ fun HomeScreen(
         PrographyProgressIndicator()
     }
 
-    Surface(
-        modifier = Modifier.padding(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LazyVerticalStaggeredGrid(
-            state = gridState,
-            columns = StaggeredGridCells.Fixed(2),
-            verticalItemSpacing = 10.dp,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            if (uiState.bookmarks.isNotEmpty()) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    CategoryTitle(title = "북마크")
-                }
-
-                if (uiState.photos.isNotEmpty()) {
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                10.dp,
-                                Alignment.Start
-                            ),
-                            verticalAlignment = Alignment.Top,
-                        ) {
-                            itemsIndexed(
-                                items = uiState.bookmarks,
-                                key = { index, bookmark -> "${bookmark.id}_$index" },
-                            ) { _, bookmark ->
-                                PhotoCard(
-                                    cardModifier = Modifier.height(128.dp),
-                                    imageUrl = bookmark.imageUrl,
-                                    onClick = { selectedPhotoId = bookmark.id },
-                                    contentScale = ContentScale.FillHeight
-                                )
-                            }
+    Surface(color = MaterialTheme.colorScheme.background) {
+        LazyColumn(Modifier.fillMaxSize().padding(top = 20.dp)) {
+            val bookmarks = uiState.bookmarks
+            if (bookmarks.isNotEmpty()) {
+                item { CategoryTitle("북마크") }
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                    ) {
+                        items(
+                            items = bookmarks,
+                            key = { it.id }
+                        ) { bookmark ->
+                            PhotoCard(
+                                cardModifier = Modifier.height(128.dp),
+                                imageUrl = bookmark.imageUrl,
+                                onClick = { selectedPhotoId = bookmark.id },
+                                contentScale = ContentScale.FillHeight
+                            )
                         }
                     }
-                } else {
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        PrographyProgressIndicator()
+                }
+            }
+            item { Spacer(Modifier.height(height = 12.dp)) }
+            item { CategoryTitle(title = "최신 이미지") }
+            item {
+                LazyVerticalStaggeredGrid(
+                    modifier = Modifier.heightIn(max = (Short.MAX_VALUE).toInt().dp).padding(top = 12.dp),
+                    state = gridState,
+                    columns = StaggeredGridCells.Fixed(2),
+                    verticalItemSpacing = 10.dp,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                ) {
+                    items(
+                        items = uiState.photos,
+                        key = { it.id },
+                    ) { photo ->
+                        PhotoCard(
+                            imageUrl = photo.urls.regular,
+                            photoDescription = photo.description,
+                            onClick = { selectedPhotoId = photo.id },
+                        )
                     }
                 }
             }
-
-            item(span = StaggeredGridItemSpan.FullLine) {
-                CategoryTitle(title = "최신 이미지")
-            }
-
-            itemsIndexed(
-                uiState.photos,
-                key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
-                PhotoCard(
-                    imageUrl = photo.urls.regular,
-                    photoDescription = photo.description,
-                    onClick = { selectedPhotoId = photo.id },
-                )
-            }
         }
-
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
         }

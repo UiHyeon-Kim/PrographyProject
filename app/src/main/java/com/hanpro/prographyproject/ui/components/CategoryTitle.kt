@@ -16,7 +16,7 @@ fun CategoryTitle(title: String) {
         text = title,
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier
-            .padding(start = 4.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
+            .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
             .fillMaxWidth()
     )
 }
