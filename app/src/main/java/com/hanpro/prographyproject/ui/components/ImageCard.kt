@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -33,13 +34,14 @@ fun PhotoCard(
 ) {
     Card(
         modifier = cardModifier
+            .clip(shape)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = shape,
         colors = CardDefaults.cardColors(backgroundColor),
     ) {
         Box {
             AsyncImage(
-                modifier = imageModifier,
+                modifier = Modifier.fillMaxSize().then(imageModifier),
                 model = imageUrl,
                 contentDescription = contentDescription,
                 contentScale = contentScale,
