@@ -3,14 +3,19 @@
 package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -64,55 +69,66 @@ fun HomeScreen(
         PrographyProgressIndicator()
     }
 
-    Surface(color = MaterialTheme.colorScheme.background) {
-        LazyColumn(Modifier.fillMaxSize().padding(top = 20.dp)) {
-            val bookmarks = uiState.bookmarks
-            if (bookmarks.isNotEmpty()) {
-                item { CategoryTitle("북마크") }
-                item {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
-                    ) {
-                        items(
-                            items = bookmarks,
-                            key = { it.id }
-                        ) { bookmark ->
-                            PhotoCard(
-                                cardModifier = Modifier.height(128.dp),
-                                imageUrl = bookmark.imageUrl,
-                                onClick = { selectedPhotoId = bookmark.id },
-                                contentScale = ContentScale.FillHeight
-                            )
+
+    Surface(
+        color = MaterialTheme.colorScheme.background
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (uiState.bookmarks.isNotEmpty()) {
+                item { CategoryTitle(title = "북마크") }
+
+                if (uiState.photos.isNotEmpty()) {
+                    item {
+                        LazyRow(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalAlignment = Alignment.Top,
+                            flingBehavior = ScrollableDefaults.flingBehavior(),
+                        ) {
+                            itemsIndexed(
+                                items = uiState.bookmarks,
+                                key = { index, bookmark -> "${bookmark.id}_$index" },
+                            ) { _, bookmark ->
+                                PhotoCard(
+                                    cardModifier = Modifier.height(128.dp),
+                                    imageUrl = bookmark.imageUrl,
+                                    onClick = { selectedPhotoId = bookmark.id },
+                                    contentScale = ContentScale.FillHeight
+                                )
+                            }
                         }
                     }
+                } else {
+                    item { PrographyProgressIndicator() }
                 }
             }
-            item { Spacer(Modifier.height(height = 12.dp)) }
+
             item { CategoryTitle(title = "최신 이미지") }
             item {
                 LazyVerticalStaggeredGrid(
-                    modifier = Modifier.heightIn(max = (Short.MAX_VALUE).toInt().dp).padding(top = 12.dp),
                     state = gridState,
                     columns = StaggeredGridCells.Fixed(2),
                     verticalItemSpacing = 10.dp,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.heightIn(max = (Short.MAX_VALUE).toInt().dp),
                     contentPadding = PaddingValues(horizontal = 16.dp),
+                    userScrollEnabled = false
                 ) {
-                    items(
-                        items = uiState.photos,
-                        key = { it.id },
-                    ) { photo ->
+                    itemsIndexed(
+                        uiState.photos,
+                        key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
                         PhotoCard(
+                            cardModifier = Modifier.fillMaxWidth().wrapContentHeight(),
                             imageUrl = photo.urls.regular,
                             photoDescription = photo.description,
                             onClick = { selectedPhotoId = photo.id },
+                            contentScale = ContentScale.Crop
                         )
                     }
                 }
             }
         }
+
+        // 상태 호이스팅
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
         }
