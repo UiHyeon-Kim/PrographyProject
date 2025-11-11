@@ -57,16 +57,22 @@ fun RandomPhotoScreen(
                 photo = photo,
                 onNextClick = {
                     coroutineScope.launch {
-                        pagerState.animateScrollToPage(page + 1)
-                        viewModel.incrementIndex()
+                        val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
+                        if (nextPage > page) {
+                            pagerState.animateScrollToPage(nextPage)
+                            viewModel.incrementIndex()
+                        }
                     }
                 },
                 onBookmarkClick = {
                     coroutineScope.launch {
                         if (!viewModel.isBookmarked(photo.id)) {
                             viewModel.addBookmark(photo)
-                            pagerState.animateScrollToPage(page + 1)
-                            viewModel.incrementIndex()
+                            val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
+                            if (nextPage > page) {
+                                pagerState.animateScrollToPage(nextPage)
+                                viewModel.incrementIndex()
+                            }
                         }
                     }
                 },
