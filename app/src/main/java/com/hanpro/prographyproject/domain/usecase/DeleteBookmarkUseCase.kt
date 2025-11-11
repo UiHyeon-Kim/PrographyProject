@@ -7,5 +7,10 @@ import javax.inject.Inject
 class DeleteBookmarkUseCase @Inject constructor(
     private val bookmarkRepository: BookmarkRepository
 ) {
-    suspend operator fun invoke(bookmark: Bookmark) = bookmarkRepository.deleteBookmark(bookmark)
+    /**
+ * 주어진 북마크를 삭제한다.
+ *
+ * @param bookmark 삭제할 북마크
+ */
+suspend operator fun invoke(bookmark: Bookmark) = bookmarkRepository.deleteBookmark(bookmark)
 }
