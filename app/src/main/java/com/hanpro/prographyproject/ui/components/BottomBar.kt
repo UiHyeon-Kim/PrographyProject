@@ -20,14 +20,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.hanpro.prographyproject.ui.navigation.NavigationItem
+import com.hanpro.prographyproject.ui.navigation.NavItem
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
 @Composable
 fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     val navItems = listOf(
-        NavigationItem.Home,
-        NavigationItem.RandomPhoto
+        NavItem.Home,
+        NavItem.Random
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

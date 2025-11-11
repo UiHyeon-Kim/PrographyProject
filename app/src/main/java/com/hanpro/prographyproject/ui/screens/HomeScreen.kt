@@ -3,16 +3,25 @@
 package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.staggeredgrid.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.ui.components.CategoryTitle
 import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
@@ -29,8 +38,12 @@ fun HomeScreen(
     val gridState = rememberLazyStaggeredGridState()
     val uiState by viewModel.uiState.collectAsState()
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+    val systemUiController = rememberSystemUiController()
 
-    LaunchedEffect(Unit) { viewModel.loadLatestPhotos(page = 1) }
+    LaunchedEffect(Unit) {
+        viewModel.loadLatestPhotos(page = 1)
+        systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
+    }
 
     // 무한 스크롤
     LaunchedEffect(gridState) {
@@ -58,30 +71,18 @@ fun HomeScreen(
 
 
     Surface(
-        modifier = Modifier.padding(),
         color = MaterialTheme.colorScheme.background
     ) {
-        LazyVerticalStaggeredGrid(
-            state = gridState,
-            columns = StaggeredGridCells.Fixed(2),
-            verticalItemSpacing = 10.dp,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            modifier = Modifier.fillMaxSize(),
-        ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
             if (uiState.bookmarks.isNotEmpty()) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    CategoryTitle(title = "북마크")
-                }
+                item { CategoryTitle(title = "북마크") }
 
                 if (uiState.photos.isNotEmpty()) {
-                    item(span = StaggeredGridItemSpan.FullLine) {
+                    item {
                         LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                10.dp,
-                                Alignment.Start
-                            ),
+                            contentPadding = PaddingValues(16.dp),
                             verticalAlignment = Alignment.Top,
+                            flingBehavior = ScrollableDefaults.flingBehavior(),
                         ) {
                             itemsIndexed(
                                 items = uiState.bookmarks,
@@ -91,29 +92,39 @@ fun HomeScreen(
                                     cardModifier = Modifier.height(128.dp),
                                     imageUrl = bookmark.imageUrl,
                                     onClick = { selectedPhotoId = bookmark.id },
+                                    contentScale = ContentScale.FillHeight
                                 )
                             }
                         }
                     }
                 } else {
-                    item(span = StaggeredGridItemSpan.FullLine) {
-                        PrographyProgressIndicator()
-                    }
+                    item { PrographyProgressIndicator() }
                 }
             }
 
-            item(span = StaggeredGridItemSpan.FullLine) {
-                CategoryTitle(title = "최신 이미지")
-            }
-
-            itemsIndexed(
-                uiState.photos,
-                key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
-                PhotoCard(
-                    imageUrl = photo.urls.regular,
-                    photoDescription = photo.description,
-                    onClick = { selectedPhotoId = photo.id },
-                )
+            item { CategoryTitle(title = "최신 이미지") }
+            item {
+                LazyVerticalStaggeredGrid(
+                    state = gridState,
+                    columns = StaggeredGridCells.Fixed(2),
+                    verticalItemSpacing = 10.dp,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.heightIn(max = (Short.MAX_VALUE).toInt().dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    userScrollEnabled = false
+                ) {
+                    itemsIndexed(
+                        uiState.photos,
+                        key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
+                        PhotoCard(
+                            cardModifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                            imageUrl = photo.urls.regular,
+                            photoDescription = photo.description,
+                            onClick = { selectedPhotoId = photo.id },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
         }
 

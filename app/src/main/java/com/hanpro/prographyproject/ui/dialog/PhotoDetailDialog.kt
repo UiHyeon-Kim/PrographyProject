@@ -9,12 +9,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,19 +23,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil3.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hanpro.prographyproject.data.source.remote.downloadMediaStore
 import com.hanpro.prographyproject.data.source.remote.downloadPublicDCIM
 import com.hanpro.prographyproject.ui.components.DetailTopBar
-import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 
 @Composable
 fun PhotoDetailDialog(
-    onClose: () -> Unit,
     photoId: String = "",
+    onClose: () -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -56,7 +57,12 @@ fun PhotoDetailDialog(
 
     DisposableEffect(Unit) {
         systemUiController.setStatusBarColor(Color.Black.copy(alpha = 0.7f), darkIcons = false)
-        onDispose { systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true) }
+        onDispose {
+            systemUiController.setStatusBarColor(
+                color = Color(0x00000000),
+                darkIcons = true
+            )
+        }
     }
 
     Dialog(
@@ -80,17 +86,19 @@ fun PhotoDetailDialog(
                     // 디테일 이미지
                     Box(
                         Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
-                            .align(Alignment.Center)
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        PhotoCard(
-                            imageUrl = photo.urls.regular,
-                            contentScale = ContentScale.FillWidth
-                        )
+                        Card {
+                            AsyncImage(
+                                modifier = Modifier.fillMaxWidth(),
+                                model = photo.urls.regular,
+                                contentDescription = "",
+                            )
+                        }
                     }
 
-                    // TODO: 함수 분리
                     DetailTopBar(
                         modifier = Modifier.align(Alignment.TopCenter),
                         userName = photo.user.username,
@@ -98,7 +106,10 @@ fun PhotoDetailDialog(
                         onClose = onClose,
                         onDownloadClick = {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q &&
-                                ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                )
                                 != PackageManager.PERMISSION_GRANTED
                             ) {
                                 permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -119,7 +130,6 @@ fun PhotoDetailDialog(
                         }
                     )
 
-                    // TODO 함수 분리
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

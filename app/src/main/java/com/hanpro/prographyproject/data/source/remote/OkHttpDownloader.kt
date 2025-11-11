@@ -5,12 +5,10 @@ import android.content.Context
 import android.os.Environment
 import android.os.Environment.getExternalStoragePublicDirectory
 import android.provider.MediaStore
-import androidx.compose.material3.InputChip
 import com.hanpro.prographyproject.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okio.IOException
 import java.io.File
 import java.io.FileOutputStream

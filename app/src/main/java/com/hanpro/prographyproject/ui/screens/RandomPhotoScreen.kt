@@ -1,17 +1,19 @@
 package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.hanpro.prographyproject.ui.components.PhotoCardAnimation
 import com.hanpro.prographyproject.ui.components.PhotoCardItems
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 @Composable
 fun RandomPhotoScreen(
@@ -19,14 +21,8 @@ fun RandomPhotoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
-
-    var currentIndex = uiState.randomPhotoIndex
-
-    LaunchedEffect(currentIndex) {
-        if (currentIndex >= uiState.randomPhotos.size - 2) {
-            viewModel.loadRandomPhotos()
-        }
-    }
+    val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
+    val coroutineScope = rememberCoroutineScope()
 
     if (uiState.randomPhotos.isEmpty()) {
         LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
@@ -34,41 +30,55 @@ fun RandomPhotoScreen(
         return
     }
 
-    val currentPhoto = uiState.randomPhotos.getOrNull(currentIndex) ?: return
-    val nextPhoto = uiState.randomPhotos.getOrNull(currentIndex + 1)
+    LaunchedEffect(Unit) {
+        snapshotFlow { pagerState.currentPage }
+            .filter { page ->
+                uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3
+            }
+            .collect {
+                viewModel.loadRandomPhotos()
+            }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 84.dp)
-            .zIndex(2f),
+            .padding(top = 16.dp, bottom = 80.dp)
+            .statusBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        nextPhoto?.let {
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 24.dp),
+            pageSpacing = 8.dp,
+        ) { page ->
+            val photo = uiState.randomPhotos[page]
             PhotoCardItems(
-                photo = it,
-                onNextClick = {},
-                onBookmarkClick = {},
-                onDetailClick = {},
-            )
-        }
-        PhotoCardAnimation(currentPhoto = currentPhoto) {
-            PhotoCardItems(
-                photo = currentPhoto,
-                onNextClick = { viewModel.incrementIndex() },
-                onBookmarkClick = { photo ->
-                    if (!viewModel.isBookmarked(photo.id)) {
-                        viewModel.addBookmark(photo)
-                        viewModel.incrementIndex()
-                    } else {
-                        viewModel.deleteBookmark(photo)
+                photo = photo,
+                onNextClick = {
+                    coroutineScope.launch {
+                        val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
+                        if (nextPage > page) {
+                            pagerState.animateScrollToPage(nextPage)
+                            viewModel.incrementIndex()
+                        }
+                    }
+                },
+                onBookmarkClick = {
+                    coroutineScope.launch {
+                        if (!viewModel.isBookmarked(photo.id)) {
+                            viewModel.addBookmark(photo)
+                            val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
+                            if (nextPage > page) {
+                                pagerState.animateScrollToPage(nextPage)
+                                viewModel.incrementIndex()
+                            }
+                        }
                     }
                 },
                 onDetailClick = { selectedPhotoId = it },
             )
         }
-
     }
 
     selectedPhotoId?.let { photoId ->
