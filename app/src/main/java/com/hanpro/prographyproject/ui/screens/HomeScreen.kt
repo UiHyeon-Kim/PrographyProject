@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -22,6 +19,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hanpro.prographyproject.data.model.PhotoDetail
+import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.ui.components.CategoryTitle
 import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
@@ -44,7 +43,6 @@ fun HomeScreen(
 ) {
     val gridState = rememberLazyStaggeredGridState()
     val uiState by viewModel.uiState.collectAsState()
-    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
     val systemUiController = rememberSystemUiController()
 
     LaunchedEffect(Unit) {
@@ -72,45 +70,66 @@ fun HomeScreen(
             }
     }
 
-    if (uiState.photos.isEmpty()) {
-        PrographyProgressIndicator()
+    when {
+        uiState.isLoading -> {
+            PrographyProgressIndicator()
+        }
+
+        uiState.error != null -> {
+            PrographyProgressIndicator()
+            // TODO: 네트워크 확인 및 재연결 로직
+        }
+
+        else -> {
+            HomeContent(
+                bookmarks = uiState.bookmarks,
+                photos = uiState.photos,
+                gridState = gridState
+            )
+        }
     }
+}
 
+@Composable
+private fun HomeContent(
+    bookmarks: List<Bookmark>,
+    photos: List<PhotoDetail>,
+    gridState: LazyStaggeredGridState,
+) {
+    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    Surface(
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            if (uiState.bookmarks.isNotEmpty()) {
-                item { CategoryTitle(title = "북마크") }
-
-                if (uiState.photos.isNotEmpty()) {
-                    item {
-                        LazyRow(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalAlignment = Alignment.Top,
-                            flingBehavior = ScrollableDefaults.flingBehavior(),
-                        ) {
-                            itemsIndexed(
-                                items = uiState.bookmarks,
-                                key = { index, bookmark -> "${bookmark.id}_$index" },
-                            ) { _, bookmark ->
-                                PhotoCard(
-                                    cardModifier = Modifier.height(128.dp),
-                                    imageUrl = bookmark.imageUrl,
-                                    onClick = { selectedPhotoId = bookmark.id },
-                                    contentScale = ContentScale.FillHeight
-                                )
-                            }
+    Surface(color = MaterialTheme.colorScheme.background) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(top = 16.dp)
+        ) {
+            if (bookmarks.isNotEmpty()) {
+                item {
+                    CategoryTitle(title = "북마크")
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        flingBehavior = ScrollableDefaults.flingBehavior(),
+                    ) {
+                        itemsIndexed(
+                            items = bookmarks,
+                            key = { index, bookmark -> "${bookmark.id}_$index" },
+                        ) { _, bookmark ->
+                            PhotoCard(
+                                cardModifier = Modifier.height(128.dp),
+                                imageUrl = bookmark.imageUrl,
+                                onClick = { selectedPhotoId = bookmark.id },
+                                contentScale = ContentScale.FillHeight
+                            )
                         }
                     }
-                } else {
-                    item { PrographyProgressIndicator() }
+                    Spacer(Modifier.height(20.dp))
                 }
             }
 
-            item { CategoryTitle(title = "최신 이미지") }
             item {
+                CategoryTitle(title = "최신 이미지")
                 LazyVerticalStaggeredGrid(
                     state = gridState,
                     columns = StaggeredGridCells.Fixed(2),
@@ -121,10 +140,12 @@ fun HomeScreen(
                     userScrollEnabled = false
                 ) {
                     itemsIndexed(
-                        uiState.photos,
+                        photos,
                         key = { index, photo -> "${photo.id}_$index" }) { _, photo ->
                         PhotoCard(
-                            cardModifier = Modifier.fillMaxWidth().wrapContentHeight(),
+                            cardModifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
                             imageUrl = photo.urls.regular,
                             photoDescription = photo.description,
                             onClick = { selectedPhotoId = photo.id },
@@ -135,7 +156,6 @@ fun HomeScreen(
             }
         }
 
-        // 상태 호이스팅
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
         }
