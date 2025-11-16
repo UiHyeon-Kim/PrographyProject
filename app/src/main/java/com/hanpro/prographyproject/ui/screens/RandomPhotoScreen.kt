@@ -2,12 +2,14 @@ package com.hanpro.prographyproject.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.PhotoCardItems
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
@@ -26,25 +28,50 @@ fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
     val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
-    val coroutineScope = rememberCoroutineScope()
 
-    if (uiState.randomPhotos.isEmpty()) {
-        LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
-        PrographyProgressIndicator()
-        return
-    }
+    LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
 
     LaunchedEffect(Unit) {
         snapshotFlow { pagerState.currentPage }
             .filter { page ->
                 uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3
             }
-            .collect {
-                viewModel.loadRandomPhotos()
-            }
+            .collect { viewModel.loadRandomPhotos() }
     }
+
+    when {
+        uiState.isLoading -> {
+            PrographyProgressIndicator()
+        }
+
+        uiState.error != null -> {
+            PrographyProgressIndicator()
+            // TODO: 네트워크 확인 및 재연결 로직
+        }
+
+        else -> {
+            RandomPhotoContent(
+                pagerState = pagerState,
+                randomPhotos = uiState.randomPhotos,
+                onIndexIncrement = { viewModel.incrementIndex() },
+                onBookmarkAdd = { photo -> viewModel.addBookmark(photo) },
+                isBookmarked = { photoId -> viewModel.isBookmarked(photoId) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun RandomPhotoContent(
+    pagerState: PagerState,
+    randomPhotos: List<PhotoDetail>,
+    onIndexIncrement: () -> Unit,
+    onBookmarkAdd: (PhotoDetail) -> Unit,
+    isBookmarked: (String) -> Boolean
+) {
+    var selectedPhotoId by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -58,7 +85,7 @@ fun RandomPhotoScreen(
             contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 8.dp,
         ) { page ->
-            val photo = uiState.randomPhotos[page]
+            val photo = randomPhotos[page]
             PhotoCardItems(
                 photo = photo,
                 onNextClick = {
@@ -66,18 +93,18 @@ fun RandomPhotoScreen(
                         val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
                         if (nextPage > page) {
                             pagerState.animateScrollToPage(nextPage)
-                            viewModel.incrementIndex()
+                            onIndexIncrement
                         }
                     }
                 },
                 onBookmarkClick = {
                     coroutineScope.launch {
-                        if (!viewModel.isBookmarked(photo.id)) {
-                            viewModel.addBookmark(photo)
+                        if (!isBookmarked(photo.id)) {
+                            onBookmarkAdd(photo)
                             val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
                             if (nextPage > page) {
                                 pagerState.animateScrollToPage(nextPage)
-                                viewModel.incrementIndex()
+                                onIndexIncrement
                             }
                         }
                     }
