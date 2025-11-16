@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.data.source.remote.UnsplashApi
-import com.hanpro.prographyproject.domain.repository.BookmarkRepository
+import com.hanpro.prographyproject.domain.usecase.AddBookmarkUseCase
+import com.hanpro.prographyproject.domain.usecase.DeleteBookmarkUseCase
+import com.hanpro.prographyproject.domain.usecase.GetBookmarksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,14 +27,16 @@ data class PhotoUiState(
 @HiltViewModel
 class PhotoViewModel @Inject constructor(
     private val unsplashApi: UnsplashApi,
-    private val bookmarkRepository: BookmarkRepository,
+    private val getBookmarksUseCase: GetBookmarksUseCase,
+    private val addBookmarkUseCase: AddBookmarkUseCase,
+    private val deleteBookmarkUseCase: DeleteBookmarkUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PhotoUiState())
     val uiState: StateFlow<PhotoUiState> = _uiState
 
     init {
         viewModelScope.launch {
-            bookmarkRepository.getBookmarks().collect() { bookmarks ->
+            getBookmarksUseCase().collect { bookmarks ->
                 _uiState.value = _uiState.value.copy(bookmarks = bookmarks)
             }
         }
@@ -89,28 +93,26 @@ class PhotoViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            bookmarkRepository.addBookmark(
-                Bookmark(
-                    id = photo.id,
-                    description = photo.description ?: "",
-                    imageUrl = photo.urls.regular
-                )
+            val bookmark = Bookmark(
+                id = photo.id,
+                description = photo.description ?: "",
+                imageUrl = photo.urls.regular
             )
-            val updatedBookmarks = bookmarkRepository.getBookmarks().first()
+            addBookmarkUseCase(bookmark)
+            val updatedBookmarks = getBookmarksUseCase().first()
             _uiState.value = _uiState.value.copy(bookmarks = updatedBookmarks)
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            bookmarkRepository.deleteBookmark(
-                Bookmark(
-                    id = photo.id,
-                    description = photo.description ?: "",
-                    imageUrl = photo.urls.regular
-                )
+            val bookmark = Bookmark(
+                id = photo.id,
+                description = photo.description ?: "",
+                imageUrl = photo.urls.regular
             )
-            val updatedBookmarks = bookmarkRepository.getBookmarks().first()
+            deleteBookmarkUseCase(bookmark)
+            val updatedBookmarks = getBookmarksUseCase().first()
             _uiState.value = _uiState.value.copy(bookmarks = updatedBookmarks)
         }
     }
