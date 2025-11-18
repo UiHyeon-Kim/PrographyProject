@@ -97,7 +97,7 @@ private fun RandomPhotoContent(
                         val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
                         if (nextPage > page) {
                             pagerState.animateScrollToPage(nextPage)
-                            onIndexIncrement
+                            onIndexIncrement()
                         }
                     }
                 },
@@ -108,7 +108,7 @@ private fun RandomPhotoContent(
                             val nextPage = (page + 1).coerceAtMost(pagerState.pageCount - 1)
                             if (nextPage > page) {
                                 pagerState.animateScrollToPage(nextPage)
-                                onIndexIncrement
+                                onIndexIncrement()
                             }
                         }
                     }
