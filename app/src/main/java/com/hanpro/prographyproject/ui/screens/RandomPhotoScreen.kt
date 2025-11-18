@@ -32,9 +32,7 @@ fun RandomPhotoScreen(
 
     val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
 
-    LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .filter { page -> uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3 }
             .collect { if (isConnected) viewModel.loadRandomPhotos() }
@@ -42,6 +40,7 @@ fun RandomPhotoScreen(
 
     when {
         !isConnected -> {
+            // TODO: 네트워크 연결 끊김 화면
             PrographyProgressIndicator()
         }
 

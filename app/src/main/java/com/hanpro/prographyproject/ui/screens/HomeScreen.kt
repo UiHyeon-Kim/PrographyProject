@@ -48,7 +48,6 @@ fun HomeScreen(
     val systemUiController = rememberSystemUiController()
 
     LaunchedEffect(Unit) {
-        viewModel.loadLatestPhotos(page = 1)
         systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
     }
 
@@ -84,6 +83,7 @@ fun HomeScreen(
         }
 
         uiState.error != null && uiState.photos.isEmpty() -> {
+            // TODO: 스켈레톤 화면으로 변경
             PrographyProgressIndicator()
         }
 
