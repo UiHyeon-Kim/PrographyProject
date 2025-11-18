@@ -41,8 +41,10 @@ import kotlinx.coroutines.flow.map
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
 ) {
-    val gridState = rememberLazyStaggeredGridState()
     val uiState by viewModel.uiState.collectAsState()
+    val isConnected by viewModel.isConnected.collectAsState()
+
+    val gridState = rememberLazyStaggeredGridState()
     val systemUiController = rememberSystemUiController()
 
     LaunchedEffect(Unit) {
@@ -63,7 +65,7 @@ fun HomeScreen(
                 totalItems > 0 && lastVisibleItemIndex >= totalItems - 3
             }
             .collect {
-                if (!uiState.isLoading) {
+                if (!uiState.isLoading && isConnected) {
                     val nextPage = (uiState.photos.size / 30) + 1
                     viewModel.loadLatestPhotos(page = nextPage)
                 }
@@ -71,13 +73,18 @@ fun HomeScreen(
     }
 
     when {
-        uiState.isLoading -> {
+        !isConnected -> {
+            // TODO: 네트워크 연결 끊김 화면
             PrographyProgressIndicator()
         }
 
-        uiState.error != null -> {
+        uiState.isLoading && uiState.photos.isEmpty() -> {
+            // TODO: 스켈레톤 화면으로 변경
             PrographyProgressIndicator()
-            // TODO: 네트워크 확인 및 재연결 로직
+        }
+
+        uiState.error != null && uiState.photos.isEmpty() -> {
+            PrographyProgressIndicator()
         }
 
         else -> {

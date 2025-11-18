@@ -28,24 +28,29 @@ fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isConnected by viewModel.isConnected.collectAsState()
+
     val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
 
     LaunchedEffect(Unit) { viewModel.loadRandomPhotos() }
 
     LaunchedEffect(Unit) {
         snapshotFlow { pagerState.currentPage }
-            .filter { page ->
-                uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3
-            }
-            .collect { viewModel.loadRandomPhotos() }
+            .filter { page -> uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3 }
+            .collect { if (isConnected) viewModel.loadRandomPhotos() }
     }
 
     when {
-        uiState.isLoading -> {
+        !isConnected -> {
             PrographyProgressIndicator()
         }
 
-        uiState.error != null -> {
+        uiState.isLoading && uiState.randomPhotos.isEmpty() -> {
+            PrographyProgressIndicator()
+            // TODO: 스켈레톤뷰로 변경
+        }
+
+        uiState.error != null && uiState.randomPhotos.isEmpty() -> {
             PrographyProgressIndicator()
             // TODO: 네트워크 확인 및 재연결 로직
         }
