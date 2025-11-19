@@ -2,6 +2,7 @@
 
 package com.hanpro.prographyproject.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
@@ -16,9 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hanpro.prographyproject.common.utils.NetworkEvent
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.ui.components.CategoryTitle
@@ -43,12 +46,27 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
+    val networkEvent by viewModel.networkEvent.collectAsState()
 
+    val context = LocalContext.current
     val gridState = rememberLazyStaggeredGridState()
     val systemUiController = rememberSystemUiController()
 
     LaunchedEffect(Unit) {
         systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
+    }
+
+    LaunchedEffect(networkEvent) {
+        when (networkEvent) {
+            is NetworkEvent.Connected -> { }
+
+            is NetworkEvent.Disconnected -> {
+                Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
+                viewModel.onNetworkEventShown()
+            }
+
+            null -> { }
+        }
     }
 
     // 무한 스크롤

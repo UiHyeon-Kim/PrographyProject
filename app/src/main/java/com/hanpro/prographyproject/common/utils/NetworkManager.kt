@@ -6,9 +6,15 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+
+sealed class NetworkEvent {
+    data object Connected : NetworkEvent()
+    data object Disconnected : NetworkEvent()
+}
 
 @Singleton
 class NetworkManager @Inject constructor(
@@ -17,15 +23,20 @@ class NetworkManager @Inject constructor(
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val _networkState = MutableStateFlow(false)
-    val networkState = _networkState.asStateFlow()
+    val networkState: StateFlow<Boolean> = _networkState.asStateFlow()
+
+    private val _networkEvent = MutableStateFlow<NetworkEvent?>(null)
+    val networkEvent: StateFlow<NetworkEvent?> = _networkEvent.asStateFlow()
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             updateNetworkState()
+            _networkEvent.value = NetworkEvent.Connected
         }
 
         override fun onLost(network: Network) {
             _networkState.value = false
+            _networkEvent.value = NetworkEvent.Disconnected
         }
 
         override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
@@ -64,5 +75,9 @@ class NetworkManager @Inject constructor(
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
         return isConnected
+    }
+
+    fun clearEvent() {
+        _networkEvent.value = null
     }
 }

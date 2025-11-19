@@ -1,5 +1,6 @@
 package com.hanpro.prographyproject.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -7,8 +8,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.hanpro.prographyproject.common.utils.NetworkEvent
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.PhotoCardItems
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
@@ -29,8 +32,23 @@ fun RandomPhotoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
+    val networkEvent by viewModel.networkEvent.collectAsState()
 
+    val context = LocalContext.current
     val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
+
+    LaunchedEffect(networkEvent) {
+        when (networkEvent) {
+            is NetworkEvent.Connected -> { }
+
+            is NetworkEvent.Disconnected -> {
+                Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
+                viewModel.onNetworkEventShown()
+            }
+
+            null -> { }
+        }
+    }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }

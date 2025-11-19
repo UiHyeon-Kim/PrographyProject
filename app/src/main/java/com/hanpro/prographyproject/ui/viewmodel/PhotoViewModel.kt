@@ -40,6 +40,7 @@ class PhotoViewModel @Inject constructor(
     val uiState: StateFlow<PhotoUiState> = _uiState
 
     val isConnected = networkManager.networkState
+    val networkEvent = networkManager.networkEvent
 
     // 네트워크 재시도 관련 변수
     private var retryJob: Job? = null
@@ -77,6 +78,50 @@ class PhotoViewModel @Inject constructor(
                 _uiState.update { it.copy(bookmarks = bookmarks) }
             }
         }
+    }
+
+    /**
+     * 네트워크 연결 재시도 시작
+     */
+    private fun startAutoRetry() {
+        cancelRetry() // 기존 재시도 작업이 있으면 취소
+
+        retryJob = viewModelScope.launch {
+            // 네트워크가 연결되어 있지 않으면서 최대 횟수 전 동안
+            while (retryCount < maxRetryCount && !isConnected.value) {
+                // 비트 마스킹으로 지수 타임 재시도 - 2 -> 4 -> 8 -> 16 -> 32
+                val delayTime = baseDelayMs * (1 shl retryCount.coerceAtMost(5))
+                delay(delayTime)
+
+                retryCount++
+
+                // 네트워크 상태 확인. 복구되었으면 observeNetworkChanges가 처리
+                if (networkManager.checkNetworkConnection()) break
+
+                _uiState.update {
+                    it.copy(error = "네트워크 연결 재시도 중 - (${retryCount}/${maxRetryCount})")
+                }
+            }
+
+            if (retryCount >= maxRetryCount && !isConnected.value) {
+                _uiState.update {
+                    it.copy(error = "네트워크 연결 실패")
+                }
+            }
+        }
+    }
+
+    /**
+     * 네트워크 연결 재시도 취소
+     */
+    private fun cancelRetry() {
+        retryJob?.cancel()
+        retryJob = null
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        cancelRetry() // 뷰모델 종료 시 재시도 작업 취소
     }
 
     fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
@@ -164,45 +209,6 @@ class PhotoViewModel @Inject constructor(
     fun isBookmarked(photoId: String): Boolean = _uiState.value.bookmarks.any { it.id == photoId }
 
     /**
-     * 네트워크 연결 재시도 시작
-     */
-    private fun startAutoRetry() {
-        cancelRetry() // 기존 재시도 작업이 있으면 취소
-
-        retryJob = viewModelScope.launch {
-            // 네트워크가 연결되어 있지 않으면서 최대 횟수 전 동안
-            while (retryCount < maxRetryCount && !isConnected.value) {
-                // 비트 마스킹으로 지수 타임 재시도 - 2 -> 4 -> 8 -> 16 -> 32
-                val delayTime = baseDelayMs * (1 shl retryCount.coerceAtMost(5))
-                delay(delayTime)
-
-                retryCount++
-
-                // 네트워크 상태 확인. 복구되었으면 observeNetworkChanges가 처리
-                if (networkManager.checkNetworkConnection()) break
-
-                _uiState.update {
-                    it.copy(error = "네트워크 연결 재시도 중 - (${retryCount}/${maxRetryCount})")
-                }
-            }
-
-            if (retryCount >= maxRetryCount && !isConnected.value) {
-                _uiState.update {
-                    it.copy(error = "네트워크 연결 실패")
-                }
-            }
-        }
-    }
-
-    /**
-     * 네트워크 연결 재시도 취소
-     */
-    private fun cancelRetry() {
-        retryJob?.cancel()
-        retryJob = null
-    }
-
-    /**
      * 네트워크 수동 재연결 로직
      */
     fun retryConnection() {
@@ -217,8 +223,7 @@ class PhotoViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        cancelRetry() // 뷰모델 종료 시 재시도 작업 취소
+    fun onNetworkEventShown() {
+        networkManager.clearEvent()
     }
 }
