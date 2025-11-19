@@ -15,6 +15,13 @@ import com.hanpro.prographyproject.ui.navigation.NavItem.Random
 import com.hanpro.prographyproject.ui.screens.HomeScreen
 import com.hanpro.prographyproject.ui.screens.RandomPhotoScreen
 
+/**
+ * 상단 바와 하단 내비게이션을 포함한 앱의 최상위 Compose 구성으로 네비게이션 호스트를 제공한다.
+ *
+ * 내부에서 전달된 NavHostController를 사용해 시작 화면(Home)과 랜덤 사진 화면(Random)으로의 라우트를 설정한다.
+ *
+ * @param navController 앱 전체의 화면 전환을 관리하는 NavHostController. 기본값은 rememberNavController()이다.
+ */
 @Composable
 fun PrographyApp(navController: NavHostController = rememberNavController()) {
     Scaffold(
@@ -31,6 +38,5 @@ fun PrographyApp(navController: NavHostController = rememberNavController()) {
         }
     }
 }
-
 
 

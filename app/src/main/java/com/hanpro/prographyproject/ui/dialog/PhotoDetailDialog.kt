@@ -32,6 +32,15 @@ import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 
+/**
+ * 사진의 상세 정보를 전체화면 다이얼로그로 표시하고 사용자가 이미지 다운로드와 북마크를 할 수 있도록 한다.
+ *
+ * 다이얼로그가 표시되는 동안 상태 표시줄 색상을 반투명 검정으로 변경하고, 닫힐 때 원래 색상으로 복구한다.
+ * 저장 동작은 필요 시 런타임 저장 권한을 요청하며, 다운로드 성공 여부를 토스트로 알린다.
+ *
+ * @param photoId 표시할 사진의 고유 식별자.
+ * @param onClose 다이얼로그를 닫을 때 호출되는 콜백.
+ */
 @Composable
 fun PhotoDetailDialog(
     photoId: String = "",

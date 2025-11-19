@@ -23,6 +23,14 @@ import androidx.navigation.compose.rememberNavController
 import com.hanpro.prographyproject.ui.navigation.NavItem
 import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 
+/**
+ * 화면 하단에 홈 및 랜덤 항목을 가진 내비게이션 바를 렌더링한다.
+ *
+ * 선택된 항목은 현재 라우트와 일치할 때 시각적으로 강조되며, 항목 탭 시 해당 라우트로 네비게이트한다.
+ *
+ * @param navController 네비게이션 상태 및 라우팅을 관리하는 NavHostController.
+ * @param modifier 레이아웃이나 스타일을 조정하기 위한 Modifier.
+ */
 @Composable
 fun BottomNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
     val navItems = listOf(
