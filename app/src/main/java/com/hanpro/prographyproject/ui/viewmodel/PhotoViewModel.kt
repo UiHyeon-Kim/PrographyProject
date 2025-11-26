@@ -11,7 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -178,14 +177,13 @@ class PhotoViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
+            // TODO: 하단과 동일한 코드. 공통 로직 분리 (Mapper 같은걸로)
             val bookmark = Bookmark(
                 id = photo.id,
                 description = photo.description ?: "",
                 imageUrl = photo.urls.regular
             )
             addBookmarkUseCase(bookmark)
-            val updatedBookmarks = getBookmarksUseCase().first()
-            _uiState.update { it.copy(bookmarks = updatedBookmarks) }
         }
     }
 
@@ -197,8 +195,6 @@ class PhotoViewModel @Inject constructor(
                 imageUrl = photo.urls.regular
             )
             deleteBookmarkUseCase(bookmark)
-            val updatedBookmarks = getBookmarksUseCase().first()
-            _uiState.update { it.copy(bookmarks = updatedBookmarks) }
         }
     }
 

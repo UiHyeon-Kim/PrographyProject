@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -29,7 +28,6 @@ import com.hanpro.prographyproject.data.source.remote.downloadMediaStore
 import com.hanpro.prographyproject.data.source.remote.downloadPublicDCIM
 import com.hanpro.prographyproject.ui.components.DetailTopBar
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
-import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
 import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 
 /**
@@ -174,17 +172,5 @@ fun PhotoDetailDialog(
                 }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun PhotoDetailDialogPreview() {
-    PrographyProjectTheme {
-        PhotoDetailDialog(
-            photoId = "",
-            onClose = {},
-            viewModel = hiltViewModel()
-        )
     }
 }

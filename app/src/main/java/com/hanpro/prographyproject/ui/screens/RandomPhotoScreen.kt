@@ -53,7 +53,7 @@ fun RandomPhotoScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .filter { page -> uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3 }
-            .collect { if (isConnected) viewModel.loadRandomPhotos() }
+            .collect { if (isConnected && !uiState.isLoading) viewModel.loadRandomPhotos() }
     }
 
     when {

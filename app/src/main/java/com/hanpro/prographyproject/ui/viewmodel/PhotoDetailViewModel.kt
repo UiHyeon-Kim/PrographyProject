@@ -54,6 +54,7 @@ class PhotoDetailViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
+            // TODO: 하단과 동일한 코드. 공통 로직 분리 (Mapper 같은걸로)
             val bookmark = Bookmark(
                 id = photo.id,
                 description = photo.description ?: "",
