@@ -20,6 +20,21 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 
+/**
+ * 이미지를 카드 형태로 표시하고 선택적으로 하단에 캡션을 오버레이로 겹쳐 보여준다.
+ *
+ * 이미지가 카드 전체를 채우도록 표시하며, 캡션이 제공되면 아래에 투명→반투명 검정 그라디언트 배경 위에 최대 2줄로 텍스트를 렌더링한다.
+ *
+ * @param imageUrl 표시할 이미지의 URL 또는 이미지 모델.
+ * @param contentDescription 접근성(스크린리더)을 위한 이미지 설명. 기본값은 null.
+ * @param photoDescription 이미지 하단에 오버레이로 표시할 캡션 텍스트. null 또는 빈 문자열이면 오버레이를 표시하지 않음.
+ * @param cardModifier Card에 적용할 Modifier. 클릭 가능 여부에 따라 내부에서 clickable Modifier가 조건부로 합쳐질 수 있음.
+ * @param imageModifier AsyncImage에 추가로 적용할 Modifier. 내부적으로 먼저 fillMaxSize()가 적용된 뒤 병합됨.
+ * @param shape 카드의 외형(shape).
+ * @param backgroundColor 카드 배경색.
+ * @param contentScale 이미지의 크기 조정 방식.
+ * @param onClick 카드 클릭 시 호출되는 콜백. null이면 클릭 동작이 없음.
+ */
 @Composable
 fun PhotoCard(
     imageUrl: String,
