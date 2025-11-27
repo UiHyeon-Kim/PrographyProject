@@ -45,14 +45,18 @@ fun RandomPhotoScreen(
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
-            is NetworkEvent.Connected -> {}
+            is NetworkEvent.Connected -> {
+                viewModel.retryConnection()
+            }
 
             is NetworkEvent.Disconnected -> {
                 Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
                 viewModel.onNetworkEventShown()
             }
 
-            null -> {}
+            null -> {
+                // 초기 상태, 처리 불필요
+            }
         }
     }
 

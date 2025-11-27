@@ -65,14 +65,18 @@ fun HomeScreen(
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
-            is NetworkEvent.Connected -> {}
+            is NetworkEvent.Connected -> {
+                viewModel.retryConnection()
+            }
 
             is NetworkEvent.Disconnected -> {
                 Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
                 viewModel.onNetworkEventShown()
             }
 
-            null -> {}
+            null -> {
+                // 초기 상태, 처리 불필요
+            }
         }
     }
 
@@ -239,9 +243,7 @@ private fun HomeSkeletonContent() {
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
