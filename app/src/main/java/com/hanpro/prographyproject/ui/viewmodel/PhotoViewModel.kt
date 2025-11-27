@@ -6,6 +6,7 @@ import com.hanpro.prographyproject.common.utils.NetworkManager
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.domain.usecase.*
+import com.hanpro.prographyproject.ui.common.extension.toBookmark
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -134,11 +135,11 @@ class PhotoViewModel @Inject constructor(
             getLatestPhotosUseCase(page, perPage)
                 .onSuccess { photos ->
                     retryCount = 0
-
-                    val newPhotos = if (page == 1) photos
-                    else (_uiState.value.photos + photos).distinctBy { it.id }
-
-                    _uiState.update { it.copy(photos = newPhotos, isLoading = false, error = null) }
+                    _uiState.update { state ->
+                        val newPhotos = if (page == 1) photos
+                        else (state.photos + photos).distinctBy { it.id }
+                        state.copy(photos = newPhotos, isLoading = false, error = null)
+                    }
                 }.onFailure { e ->
                     _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
@@ -177,24 +178,13 @@ class PhotoViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            // TODO: 하단과 동일한 코드. 공통 로직 분리 (Mapper 같은걸로)
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            addBookmarkUseCase(bookmark)
+            addBookmarkUseCase(photo.toBookmark())
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            deleteBookmarkUseCase(bookmark)
+            deleteBookmarkUseCase(photo.toBookmark())
         }
     }
 

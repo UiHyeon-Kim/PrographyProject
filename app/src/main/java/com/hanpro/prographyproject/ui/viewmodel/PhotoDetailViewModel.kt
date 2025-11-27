@@ -3,11 +3,11 @@ package com.hanpro.prographyproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.domain.usecase.AddBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.DeleteBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.GetBookmarksUseCase
 import com.hanpro.prographyproject.domain.usecase.GetPhotoDetailUseCase
+import com.hanpro.prographyproject.ui.common.extension.toBookmark
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,25 +54,14 @@ class PhotoDetailViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            // TODO: 하단과 동일한 코드. 공통 로직 분리 (Mapper 같은걸로)
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            addBookmarkUseCase(bookmark)
+            addBookmarkUseCase(photo.toBookmark())
             _uiState.value = _uiState.value.copy(isBookmarked = true)
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            deleteBookmarkUseCase(bookmark)
+            deleteBookmarkUseCase(photo.toBookmark())
             _uiState.value = _uiState.value.copy(isBookmarked = false)
         }
     }
