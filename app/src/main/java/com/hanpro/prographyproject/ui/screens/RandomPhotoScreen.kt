@@ -1,13 +1,16 @@
 package com.hanpro.prographyproject.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -17,6 +20,9 @@ import com.hanpro.prographyproject.ui.components.PhotoCardItems
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -39,14 +45,14 @@ fun RandomPhotoScreen(
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
-            is NetworkEvent.Connected -> { }
+            is NetworkEvent.Connected -> {}
 
             is NetworkEvent.Disconnected -> {
                 Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
                 viewModel.onNetworkEventShown()
             }
 
-            null -> { }
+            null -> {}
         }
     }
 
@@ -58,13 +64,11 @@ fun RandomPhotoScreen(
 
     when {
         !isConnected -> {
-            // TODO: 네트워크 연결 끊김 화면
-            PrographyProgressIndicator()
+            NoNetworkScreen { viewModel.retryConnection() }
         }
 
         uiState.isLoading && uiState.randomPhotos.isEmpty() -> {
-            PrographyProgressIndicator()
-            // TODO: 스켈레톤뷰로 변경
+            RandomSkeletonContent()
         }
 
         uiState.error != null && uiState.randomPhotos.isEmpty() -> {
@@ -138,5 +142,26 @@ private fun RandomPhotoContent(
 
     selectedPhotoId?.let { photoId ->
         PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
+    }
+}
+
+@Composable
+private fun RandomSkeletonContent() {
+    val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp, bottom = 80.dp)
+            .statusBarsPadding(),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .shimmer(shimmer)
+                .background(Color.LightGray, shape = RoundedCornerShape(15.dp))
+        )
     }
 }
