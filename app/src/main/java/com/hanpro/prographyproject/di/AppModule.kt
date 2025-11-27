@@ -1,7 +1,7 @@
 package com.hanpro.prographyproject.di
 
 import com.hanpro.prographyproject.BuildConfig
-import com.hanpro.prographyproject.data.source.remote.UnsplashApi
+import com.hanpro.prographyproject.data.source.remote.UnsplashApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,7 +45,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideUnsplashApi(retrofit: Retrofit): UnsplashApi {
-        return retrofit.create(UnsplashApi::class.java)
+    fun provideUnsplashApi(retrofit: Retrofit): UnsplashApiService {
+        return retrofit.create(UnsplashApiService::class.java)
     }
 }
