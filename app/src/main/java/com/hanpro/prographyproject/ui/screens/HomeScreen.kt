@@ -4,12 +4,16 @@ package com.hanpro.prographyproject.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -29,6 +33,9 @@ import com.hanpro.prographyproject.ui.components.PhotoCard
 import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
+import com.valentinilk.shimmer.ShimmerBounds
+import com.valentinilk.shimmer.rememberShimmer
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -58,14 +65,18 @@ fun HomeScreen(
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
-            is NetworkEvent.Connected -> { }
+            is NetworkEvent.Connected -> {
+                viewModel.retryConnection()
+            }
 
             is NetworkEvent.Disconnected -> {
                 Toast.makeText(context, "네트워크 연결이 끊어졌습니다", Toast.LENGTH_SHORT).show()
                 viewModel.onNetworkEventShown()
             }
 
-            null -> { }
+            null -> {
+                // 초기 상태, 처리 불필요
+            }
         }
     }
 
@@ -91,17 +102,15 @@ fun HomeScreen(
 
     when {
         !isConnected -> {
-            // TODO: 네트워크 연결 끊김 화면
-            PrographyProgressIndicator()
+            NoNetworkScreen { viewModel.retryConnection() }
         }
 
         uiState.isLoading && uiState.photos.isEmpty() -> {
-            // TODO: 스켈레톤 화면으로 변경
-            PrographyProgressIndicator()
+            HomeSkeletonContent()
         }
 
         uiState.error != null && uiState.photos.isEmpty() -> {
-            // TODO: 스켈레톤 화면으로 변경
+            // TODO: 아무튼 재시도 화면?
             PrographyProgressIndicator()
         }
 
@@ -183,6 +192,72 @@ private fun HomeContent(
 
         selectedPhotoId?.let { photoId ->
             PhotoDetailDialog(photoId = photoId, onClose = { selectedPhotoId = null })
+        }
+    }
+}
+
+@Composable
+private fun HomeSkeletonContent() {
+    val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+
+    Column {
+        Spacer(Modifier.height(16.dp))
+
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .height(32.dp)
+                .width(72.dp)
+                .shimmer(shimmer)
+                .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            userScrollEnabled = false
+        ) {
+            items(6) {
+                Box(
+                    modifier = Modifier
+                        .height(128.dp)
+                        .width(100.dp)
+                        .shimmer(shimmer)
+                        .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                )
+            }
+        }
+
+        Spacer(Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .height(32.dp)
+                .width(100.dp)
+                .shimmer(shimmer)
+                .background(Color.LightGray, shape = RoundedCornerShape(8.dp)),
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            userScrollEnabled = false
+        ) {
+            items(10) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(128.dp)
+                        .shimmer(shimmer)
+                        .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                )
+            }
         }
     }
 }

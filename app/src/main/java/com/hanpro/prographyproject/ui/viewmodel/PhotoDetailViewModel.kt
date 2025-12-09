@@ -3,11 +3,11 @@ package com.hanpro.prographyproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.data.model.PhotoDetail
-import com.hanpro.prographyproject.data.source.local.Bookmark
-import com.hanpro.prographyproject.data.source.remote.UnsplashApi
 import com.hanpro.prographyproject.domain.usecase.AddBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.DeleteBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.GetBookmarksUseCase
+import com.hanpro.prographyproject.domain.usecase.GetPhotoDetailUseCase
+import com.hanpro.prographyproject.ui.common.extension.toBookmark
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +24,7 @@ data class PhotoDetailUiState(
 
 @HiltViewModel
 class PhotoDetailViewModel @Inject constructor(
-    private val unsplashApi: UnsplashApi,
+    private val getPhotoDetailUseCase: GetPhotoDetailUseCase,
     private val getBookmarksUseCase: GetBookmarksUseCase,
     private val addBookmarkUseCase: AddBookmarkUseCase,
     private val deleteBookmarkUseCase: DeleteBookmarkUseCase,
@@ -35,42 +35,33 @@ class PhotoDetailViewModel @Inject constructor(
     fun loadPhotoDetail(photoId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
-            try {
-                val photo = unsplashApi.getPhotoDetail(photoId)
-                val bookmarkList = getBookmarksUseCase().first()
-                val bookmarked = bookmarkList.any { it.id == photoId }
-                _uiState.value = PhotoDetailUiState(
-                    photo = photo,
-                    isLoading = false,
-                    error = null,
-                    isBookmarked = bookmarked
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
-            }
+
+            getPhotoDetailUseCase(photoId)
+                .onSuccess { photo ->
+                    val bookmarkList = getBookmarksUseCase().first()
+                    val bookmarked = bookmarkList.any { it.id == photoId }
+                    _uiState.value = PhotoDetailUiState(
+                        photo = photo,
+                        isLoading = false,
+                        error = null,
+                        isBookmarked = bookmarked
+                    )
+                }.onFailure { e ->
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
+                }
         }
     }
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            addBookmarkUseCase(bookmark)
+            addBookmarkUseCase(photo.toBookmark())
             _uiState.value = _uiState.value.copy(isBookmarked = true)
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            deleteBookmarkUseCase(bookmark)
+            deleteBookmarkUseCase(photo.toBookmark())
             _uiState.value = _uiState.value.copy(isBookmarked = false)
         }
     }

@@ -5,9 +5,9 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface UnsplashApi {
+interface UnsplashApiService {
     @GET("photos")
-    suspend fun photoPages(
+    suspend fun getPhotoPages(
         @Query("page") page: Int = 1,           // 페이지
         @Query("per_page") perPage: Int = 30,   // 페이지 당 항목
     ): List<PhotoDetail>

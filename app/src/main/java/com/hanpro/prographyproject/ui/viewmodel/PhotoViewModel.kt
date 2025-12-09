@@ -5,16 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.hanpro.prographyproject.common.utils.NetworkManager
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.source.local.Bookmark
-import com.hanpro.prographyproject.data.source.remote.UnsplashApi
-import com.hanpro.prographyproject.domain.usecase.AddBookmarkUseCase
-import com.hanpro.prographyproject.domain.usecase.DeleteBookmarkUseCase
-import com.hanpro.prographyproject.domain.usecase.GetBookmarksUseCase
+import com.hanpro.prographyproject.domain.usecase.*
+import com.hanpro.prographyproject.ui.common.extension.toBookmark
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,7 +27,8 @@ data class PhotoUiState(
 
 @HiltViewModel
 class PhotoViewModel @Inject constructor(
-    private val unsplashApi: UnsplashApi,
+    private val getLatestPhotosUseCase: GetLatestPhotosUseCase,
+    private val getRandomPhotosUseCase: GetRandomPhotosUseCase,
     private val getBookmarksUseCase: GetBookmarksUseCase,
     private val addBookmarkUseCase: AddBookmarkUseCase,
     private val deleteBookmarkUseCase: DeleteBookmarkUseCase,
@@ -134,18 +132,17 @@ class PhotoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            runCatching {
-                unsplashApi.photoPages(page, perPage)
-            }.onSuccess { photos ->
-                retryCount = 0
-
-                val newPhotos = if (page == 1) photos
-                else (_uiState.value.photos + photos).distinctBy { it.id }
-
-                _uiState.update { it.copy(photos = newPhotos, isLoading = false, error = null) }
-            }.onFailure { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
-            }
+            getLatestPhotosUseCase(page, perPage)
+                .onSuccess { photos ->
+                    retryCount = 0
+                    _uiState.update { state ->
+                        val newPhotos = if (page == 1) photos
+                        else (state.photos + photos).distinctBy { it.id }
+                        state.copy(photos = newPhotos, isLoading = false, error = null)
+                    }
+                }.onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
+                }
         }
     }
 
@@ -158,21 +155,20 @@ class PhotoViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            runCatching {
-                unsplashApi.getRandomPhoto(10)
-            }.onSuccess { photos ->
-                retryCount = 0
+            getRandomPhotosUseCase(10)
+                .onSuccess { photos ->
+                    retryCount = 0
 
-                _uiState.update {
-                    it.copy(
-                        randomPhotos = _uiState.value.randomPhotos + photos,
-                        isLoading = false,
-                        error = null
-                    )
+                    _uiState.update {
+                        it.copy(
+                            randomPhotos = _uiState.value.randomPhotos + photos,
+                            isLoading = false,
+                            error = null
+                        )
+                    }
+                }.onFailure { e ->
+                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
-            }.onFailure { e ->
-                _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
-            }
         }
     }
 
@@ -182,27 +178,13 @@ class PhotoViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            addBookmarkUseCase(bookmark)
-            val updatedBookmarks = getBookmarksUseCase().first()
-            _uiState.update { it.copy(bookmarks = updatedBookmarks) }
+            addBookmarkUseCase(photo.toBookmark())
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            val bookmark = Bookmark(
-                id = photo.id,
-                description = photo.description ?: "",
-                imageUrl = photo.urls.regular
-            )
-            deleteBookmarkUseCase(bookmark)
-            val updatedBookmarks = getBookmarksUseCase().first()
-            _uiState.update { it.copy(bookmarks = updatedBookmarks) }
+            deleteBookmarkUseCase(photo.toBookmark())
         }
     }
 
