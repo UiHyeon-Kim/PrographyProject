@@ -7,7 +7,7 @@ import retrofit2.http.Query
 
 interface UnsplashApiService {
     @GET("photos")
-    suspend fun getPhotoPages(
+    suspend fun getLatestPhotos(
         @Query("page") page: Int = 1,           // 페이지
         @Query("per_page") perPage: Int = 30,   // 페이지 당 항목
     ): List<PhotoDetail>
@@ -16,7 +16,7 @@ interface UnsplashApiService {
     suspend fun getPhotoDetail(@Path("id") id: String): PhotoDetail
 
     @GET("photos/random")
-    suspend fun getRandomPhoto(
+    suspend fun getRandomPhotos(
         @Query("count") count: Int = 10,
     ): List<PhotoDetail>
 }
