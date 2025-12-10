@@ -94,4 +94,59 @@ class PhotoRepositoryTest {
         // confirmVerified 객체 이전에 명시적으로 호출된 verify 외에 다른 호출은 없었음을 확인
         confirmVerified(photoRemoteDataSource)
     }
+
+
+    // getRandomPhotos 테스트
+
+    @Test
+    fun `getRandomPhotos를 원격 DataSource에 위임하고 성공을 반환한다`() = runTest {
+        // Given
+        val count = 10
+        val mockPhotos = listOf(mockPhotoDetail, mockPhotoDetail.copy(id = "random-id"))
+        val successResult = Result.success(mockPhotos)
+
+        coEvery { photoRemoteDataSource.getRandomPhotos(count) } returns successResult
+
+        // When
+        val result = photoRepository.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotos == result.getOrNull())
+        coVerify { photoRemoteDataSource.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos를 원격 DataSource에 위임하고 실패를 반환한다`() = runTest {
+        // Given
+        val count = 10
+        val exception = RuntimeException("Network error")
+        val failureResult = Result.failure<List<PhotoDetail>>(exception)
+
+        coEvery { photoRemoteDataSource.getRandomPhotos(count) } returns failureResult
+
+        // When
+        val result = photoRepository.getRandomPhotos(count)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coVerify { photoRemoteDataSource.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 원격 DataSource에 올바른 매개변수를 전달한다`() = runTest {
+        // Given
+        val count = 20
+        val successResult = Result.success(emptyList<PhotoDetail>())
+
+        coEvery { photoRemoteDataSource.getRandomPhotos(count) } returns successResult
+
+        // When
+        val result = photoRepository.getRandomPhotos(count)
+
+        // Then
+        coVerify { photoRemoteDataSource.getRandomPhotos(count) }
+        confirmVerified(photoRemoteDataSource)
+    }
 }
