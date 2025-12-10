@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 val properties = Properties().apply {
@@ -73,12 +73,12 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.dagger.hilt.compiler)
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.room.compiler)
 
     // shimmer
     implementation(libs.compose.shimmer)
@@ -104,8 +104,4 @@ dependencies {
     testImplementation(libs.junit)                      // 자바 기본 테스트 라이브러리
     testImplementation(libs.mockk)                      // 코틀린용 모킹 라이브러리
     testImplementation(libs.kotlinx.coroutines.test)    // 코루틴 테스트용 - runTest 등
-}
-
-kapt {
-    correctErrorTypes = true
 }
