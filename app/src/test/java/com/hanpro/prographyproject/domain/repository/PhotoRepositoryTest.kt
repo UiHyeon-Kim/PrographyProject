@@ -143,10 +143,93 @@ class PhotoRepositoryTest {
         coEvery { photoRemoteDataSource.getRandomPhotos(count) } returns successResult
 
         // When
-        val result = photoRepository.getRandomPhotos(count)
+        photoRepository.getRandomPhotos(count)
 
         // Then
         coVerify { photoRemoteDataSource.getRandomPhotos(count) }
         confirmVerified(photoRemoteDataSource)
+    }
+
+
+    // getPhotoDetail 테스트
+    @Test
+    fun `getPhotoDetail을 원격 DataSource에 위임하고 성공을 반환한다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val successResult = Result.success(mockPhotoDetail)
+
+        coEvery { photoRemoteDataSource.getPhotoDetail(photoId) } returns successResult
+
+        // When
+        val result = photoRepository.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotoDetail == result.getOrNull())
+        coVerify { photoRemoteDataSource.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail을 원격 DataSource에 위임하고 실패를 반환한다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val exception = RuntimeException("Network error")
+        val failureResult = Result.failure<PhotoDetail>(exception)
+
+        coEvery { photoRemoteDataSource.getPhotoDetail(photoId) } returns failureResult
+
+        // When
+        val result = photoRepository.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coVerify { photoRemoteDataSource.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 원격 DataSource에 올바른 ID를 전달한다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val successResult = Result.success(mockPhotoDetail)
+
+        coEvery { photoRemoteDataSource.getPhotoDetail(photoId) } returns successResult
+
+        // When
+        photoRepository.getPhotoDetail(photoId)
+
+        // Then
+        coVerify { photoRemoteDataSource.getPhotoDetail(photoId) }
+        confirmVerified(photoRemoteDataSource)
+    }
+
+
+    // 전체 테스트
+
+    @Test
+    fun `Repository는 모든 작업에 대해 DataSource로 전달하는 역할을 한다`() = runTest {
+        // Given
+        val page = 1
+        val perPage = 30
+        val count = 10
+        val photoId = "test-id"
+
+        val latestPhotosResult = Result.success(listOf(mockPhotoDetail))
+        val randomPhotosResult = Result.success(listOf(mockPhotoDetail))
+        val photoDetailResult = Result.success(mockPhotoDetail)
+
+        coEvery { photoRemoteDataSource.getLatestPhotos(page, perPage) } returns latestPhotosResult
+        coEvery { photoRemoteDataSource.getRandomPhotos(count) } returns randomPhotosResult
+        coEvery { photoRemoteDataSource.getPhotoDetail(photoId) } returns photoDetailResult
+
+        // When
+        val latestPhotos = photoRepository.getLatestPhotos(page, perPage)
+        val randomPhotos = photoRepository.getRandomPhotos(count)
+        val photoDetail = photoRepository.getPhotoDetail(photoId)
+
+        // Then
+        assert(latestPhotos == latestPhotosResult)
+        assert(randomPhotos == randomPhotosResult)
+        assert(photoDetail == photoDetailResult)
     }
 }
