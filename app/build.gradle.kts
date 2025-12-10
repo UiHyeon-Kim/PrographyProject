@@ -102,8 +102,7 @@ dependencies {
 
     // Test
     testImplementation(libs.junit)                      // 자바 기본 테스트 라이브러리
-    testImplementation(libs.mockito.core)               // 자바 기반 모킹 라이브러리
-    testImplementation(libs.mockito.kotlin)             // 코틀린 Mockito 래퍼
+    testImplementation(libs.mockk)                      // 코틀린용 모킹 라이브러리
     testImplementation(libs.kotlinx.coroutines.test)    // 코루틴 테스트용 - runTest 등
 }
 
