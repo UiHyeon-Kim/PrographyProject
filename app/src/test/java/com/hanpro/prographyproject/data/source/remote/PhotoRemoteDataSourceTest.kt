@@ -24,7 +24,7 @@ class PhotoRemoteDataSourceTest {
     // 테스트에서 사용할 가짜 응답 객체
     // 외부 API 호출하지 않아도 이 데이터를 반환하도록 Mock 설정하기 위함
     private val mockPhotoDetail = PhotoDetail(
-        id = "123",
+        id = "test-id",
         description = "Test Photo",
         urls = Urls(full = "https://example.com/photo.jpg", regular = "https://example.com/photo-regular.jpg"),
         tags = emptyList(),
@@ -173,5 +173,123 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isSuccess)
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+
+    // getRandomPhotos 테스트
+
+    @Test
+    fun `getRandomPhotos는 API 호출이 성공하면 사진 리스트와 함께 성공을 반환한다`() = runTest {
+        // Given
+        val count = 10
+        val mockPhotos = listOf(mockPhotoDetail, mockPhotoDetail.copy(id = "random-id"))
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotos == result.getOrNull())
+        coVerify { unsplashApiService.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 매개변수가 제공되지 않을 경우 기본 값을 사용한다`() = runTest {
+        // Given
+        val mockPhotos = listOf(mockPhotoDetail)
+
+        coEvery { unsplashApiService.getRandomPhotos() } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos()
+
+        // Then
+        assert(result.isSuccess)
+        coVerify { unsplashApiService.getRandomPhotos() }
+    }
+
+    @Test
+    fun `getRandomPhotos는 API가 빈 경우 빈 리스트로 성공을 반환한다`() = runTest {
+        // Given
+        val count = 10
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } returns emptyList()
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(emptyList<PhotoDetail>() == result.getOrNull())
+        coVerify { unsplashApiService.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 API가 IOException을 던질 때 실패를 반환한다`() = runTest {
+        // Given
+        val count = 10
+        val exception = IOException("Network error")
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 다른 카운트 값을 사용해도 정상 동작한다`() = runTest {
+        // Given
+        val count = 20
+        val mockPhotos = List(count) { mockPhotoDetail.copy(id = "random-id-$it") }
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(count == result.getOrNull()?.size)
+        coVerify { unsplashApiService.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 1개의 이미지를 요청할 수 있다`() = runTest {
+        // Given
+        val count = 1
+        val mockPhotos = listOf(mockPhotoDetail)
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotos == result.getOrNull())
+        coVerify { unsplashApiService.getRandomPhotos(count) }
+    }
+
+    @Test
+    fun `getRandomPhotos는 큰 카운트 값을 처리할 수 있다`() = runTest {
+        val count = 100
+        val mockPhotos = List(count) { mockPhotoDetail.copy(id = "random-id-$it") }
+
+        coEvery { unsplashApiService.getRandomPhotos(count) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getRandomPhotos(count)
+
+        // Then
+        assert(result.isSuccess)
+        assert(count == result.getOrNull()?.size)
+        coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 }
