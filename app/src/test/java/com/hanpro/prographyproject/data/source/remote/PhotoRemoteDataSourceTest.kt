@@ -412,4 +412,27 @@ class PhotoRemoteDataSourceTest {
         assert(mockPhotoDetailWithNullTags == result.getOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
+
+
+    // 에러 테스트
+
+    @Test
+    fun `모든 메서드는 응답 실패시 예외를 반환한다`() = runTest {
+        // Given
+        val exception = RuntimeException("Generic error")
+
+        coEvery { unsplashApiService.getLatestPhotos() } throws exception
+        coEvery { unsplashApiService.getRandomPhotos() } throws exception
+        coEvery { unsplashApiService.getPhotoDetail("") } throws exception
+
+        // When
+        val latestPhotosResult = photoRemoteDataSource.getLatestPhotos()
+        val randomPhotosResult = photoRemoteDataSource.getRandomPhotos()
+        val photoDetailResult = photoRemoteDataSource.getPhotoDetail("")
+
+        // Then
+        assert(latestPhotosResult.isFailure)
+        assert(randomPhotosResult.isFailure)
+        assert(photoDetailResult.isFailure)
+    }
 }
