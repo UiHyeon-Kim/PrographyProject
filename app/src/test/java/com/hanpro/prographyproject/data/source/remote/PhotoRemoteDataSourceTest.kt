@@ -292,4 +292,124 @@ class PhotoRemoteDataSourceTest {
         assert(count == result.getOrNull()?.size)
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
+
+
+    // getPhotoDetail 테스트
+
+    @Test
+    fun `getPhotoDetail은 API 호출이 성공하면 photo detail과 함께 성공을 반환한다`() = runTest {
+        // Given
+        val photoId = "test-id"
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } returns mockPhotoDetail
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotoDetail == result.getOrNull())
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 API가 IOException을 던질 때 실패를 반환한다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val exception = IOException("Network error")
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 사진을 찾지 못하면 실패를 반환한다`() = runTest {
+        // Given
+        val photoId = "non-existent-id"
+        val exception = RuntimeException("404 Not Found")
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 빈 문자열 ID일 때 오류를 반환한다`() = runTest {
+        // Given
+        val photoId = ""
+        val exception = IllegalArgumentException("Invalid photo ID")
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 ID에서 특수 문자를 다룰 수 있다`() = runTest {
+        // Given
+        val photoId = "photo-id-with-special-chars-123_abc@"
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } returns mockPhotoDetail
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotoDetail == result.getOrNull())
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 응답 시 null description을 처리할 수 있다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val mockPhotoDetailWithNullDescription = mockPhotoDetail.copy(description = null)
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } returns mockPhotoDetailWithNullDescription
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotoDetailWithNullDescription == result.getOrNull())
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
+    }
+
+    @Test
+    fun `getPhotoDetail은 null 태그를 처리할 수 있다`() = runTest {
+        // Given
+        val photoId = "test-id"
+        val mockPhotoDetailWithNullTags = mockPhotoDetail.copy(tags = null)
+
+        coEvery { unsplashApiService.getPhotoDetail(photoId) } returns mockPhotoDetailWithNullTags
+
+        // When
+        val result = photoRemoteDataSource.getPhotoDetail(photoId)
+
+        // Then
+        assert(result.isSuccess)
+        assert(mockPhotoDetailWithNullTags == result.getOrNull())
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
+    }
 }
