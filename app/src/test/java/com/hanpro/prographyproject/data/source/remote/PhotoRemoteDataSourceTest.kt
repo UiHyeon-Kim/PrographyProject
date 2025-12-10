@@ -4,19 +4,20 @@ import com.hanpro.prographyproject.data.model.Link
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.data.model.Urls
 import com.hanpro.prographyproject.data.model.User
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
-import org.mockito.kotlin.verify
+import java.io.IOException
 
 class PhotoRemoteDataSourceTest {
 
     // Mock(가짜) 객체 생성
     // 실제 네트워크 요청이 아닌, 특정 값만 반환하도록 설정해서 테스트 가능
-    @Mock
+    @MockK
     private lateinit var unsplashApiService: UnsplashApiService
     private lateinit var photoRemoteDataSource: PhotoRemoteDataSource
 
@@ -36,11 +37,13 @@ class PhotoRemoteDataSourceTest {
     fun setup() {
 
         // @Mock 어노테이션이 붙은 객체들을 Mock 객체로 생성(초기화) - 여기선 unsplashApiService
-        MockitoAnnotations.openMocks(this)
+        MockKAnnotations.init(this)
 
         // 테스트 대상 클래스 초기화 - Mock 서비스 주입
         photoRemoteDataSource = PhotoRemoteDataSource(unsplashApiService)
     }
+
+    // getLatestPhotos 테스트
 
     // 하나의 테스트 케이스
     // runTest: Coroutine 테스트 지원 - suspend 함수를 테스트하기 위함
@@ -55,7 +58,7 @@ class PhotoRemoteDataSourceTest {
 
         // Mock API 가 특정 입력에 대해 어떤 값을 반환하게 할지 지정하는 부분
         // 네트워크 요청을 하지말고 mockResponse를 반환해라
-        `when`(unsplashApiService.getLatestPhotos(page, perPage)).thenReturn(mockResponse)
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } returns mockResponse
 
         // When
         // 테스트 대상 함수 호출 - 내부에서 unsplashApiService.getPhotoPages() 가 호출됨(현재는 Mock 반환)
@@ -67,6 +70,108 @@ class PhotoRemoteDataSourceTest {
 
         // verify: Mock 객체의 특정 메서드가 정확히 호출되었는지 확인. 시그니처까지 체크해 의도대로 동작했는지를 보장함
         // 이게 없으면 DataSource 내부에서 API를 호출 안해도 테스트 통과할 수 있음
-        verify(unsplashApiService).getLatestPhotos(page, perPage)
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 API가 빈 값을 반환할 때 빈 리스트로 성공을 반환한다`() = runTest {
+        // Given
+        val page = 1
+        val perPage = 10
+
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } returns emptyList()
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
+
+        // Then
+        assert(result.isSuccess)
+        assert(emptyList<PhotoDetail>() == result.getOrNull())
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 매개변수가 제공되지 않을 경우 기본 매개변수를 사용한다`() = runTest {
+        // Given
+        val mockPhotos = listOf(mockPhotoDetail)
+
+        coEvery { unsplashApiService.getLatestPhotos() } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos()
+
+        // Then
+        assert(result.isSuccess)
+        coVerify { unsplashApiService.getLatestPhotos(1, 30) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 API가 IOException을 던질 때 실패를 반환한다`() = runTest {
+        // Given
+        val page = 1
+        val perPage = 10
+        val exception = IOException("Network error")
+
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 API가 generic exception을 던질 때 실패를 반환한다`() = runTest {
+        // Given
+        val page = 2
+        val perPage = 20
+        val exception = Exception("Generic error")
+
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } throws exception
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
+
+        // Then
+        assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 다른 매개변수로 호출해도 정상 동작한다`() = runTest {
+        // Given
+        val page = 5
+        val perPage = 50
+        val mockPhotos = listOf(mockPhotoDetail)
+
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
+
+        // Then
+        assert(result.isSuccess)
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
+    }
+
+    @Test
+    fun `getLatestPhotos는 0페이지의 경계값을 처리한다`() = runTest {
+        // Given
+        val page = 0
+        val perPage = 10
+        val mockPhotos = listOf(mockPhotoDetail)
+
+        coEvery { unsplashApiService.getLatestPhotos(page, perPage) } returns mockPhotos
+
+        // When
+        val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
+
+        // Then
+        assert(result.isSuccess)
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 }
