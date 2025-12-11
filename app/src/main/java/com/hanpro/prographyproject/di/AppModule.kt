@@ -6,7 +6,6 @@ import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import coil3.util.DebugLogger
 import com.hanpro.prographyproject.BuildConfig
 import com.hanpro.prographyproject.data.source.remote.UnsplashApiService
 import dagger.Module
@@ -38,7 +37,7 @@ object AppModule {
         val cache = Cache(cacheDirectory, cacheSize)
 
         return OkHttpClient.Builder()
-            .addInterceptor(logging)
+//            .addInterceptor(logging)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .header("Authorization", "Client-ID ${BuildConfig.UNSPLASH_KEY}")
@@ -81,7 +80,7 @@ object AppModule {
                     .maxSizeBytes(200L * 1024 * 1024) // 200 MB
                     .build()
             }
-            .logger(DebugLogger())
+//            .logger(DebugLogger())
             .build()
     }
 

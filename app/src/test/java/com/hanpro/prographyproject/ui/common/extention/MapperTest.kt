@@ -171,7 +171,7 @@ class MapperTest {
     }
 
     @Test
-    fun `toBookmark는 User 필드를 무시합니다`() {
+    fun `toBookmark는 User 필드를 무시한다`() {
         // Given
         val photoWithUser = mockPhotoDetail.copy(
             user = User(username = "differentuser")
