@@ -12,12 +12,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PhotoDetailUiState(
     val photo: PhotoDetail? = null,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null,
     val isBookmarked: Boolean = false,
 )
@@ -34,20 +35,22 @@ class PhotoDetailViewModel @Inject constructor(
 
     fun loadPhotoDetail(photoId: String) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            _uiState.update { it.copy(isLoading = true, error = null) }
 
             getPhotoDetailUseCase(photoId)
                 .onSuccess { photo ->
                     val bookmarkList = getBookmarksUseCase().first()
                     val bookmarked = bookmarkList.any { it.id == photoId }
-                    _uiState.value = PhotoDetailUiState(
-                        photo = photo,
-                        isLoading = false,
-                        error = null,
-                        isBookmarked = bookmarked
-                    )
+                    _uiState.update {
+                        it.copy(
+                            photo = photo,
+                            isLoading = false,
+                            error = null,
+                            isBookmarked = bookmarked
+                        )
+                    }
                 }.onFailure { e ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = e.message)
+                    _uiState.update { it.copy(isLoading = false, error = e.message) }
                 }
         }
     }
@@ -55,14 +58,14 @@ class PhotoDetailViewModel @Inject constructor(
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
             addBookmarkUseCase(photo.toBookmark())
-            _uiState.value = _uiState.value.copy(isBookmarked = true)
+            _uiState.update { it.copy(isBookmarked = true) }
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
             deleteBookmarkUseCase(photo.toBookmark())
-            _uiState.value = _uiState.value.copy(isBookmarked = false)
+            _uiState.update { it.copy(isBookmarked = false) }
         }
     }
 }
