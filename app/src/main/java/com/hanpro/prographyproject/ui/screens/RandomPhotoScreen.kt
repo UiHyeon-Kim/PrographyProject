@@ -98,13 +98,14 @@ private fun RandomPhotoContent(
     randomPhotos: List<PhotoDetail>,
     onIndexIncrement: () -> Unit,
     onBookmarkAdd: (PhotoDetail) -> Unit,
-    isBookmarked: (String) -> Boolean
+    isBookmarked: (String) -> Boolean,
+    modifier: Modifier = Modifier
 ) {
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 80.dp)
             .statusBarsPadding(),

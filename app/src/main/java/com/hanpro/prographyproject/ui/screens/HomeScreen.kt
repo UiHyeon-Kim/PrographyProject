@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -65,6 +66,7 @@ fun HomeScreen(
         when (networkEvent) {
             is NetworkEvent.Connected -> {
                 viewModel.retryConnection()
+                Toast.makeText(context, "네트워크가 연결되었습니다", Toast.LENGTH_SHORT).show()
             }
 
             is NetworkEvent.Disconnected -> {
@@ -123,10 +125,14 @@ private fun HomeContent(
     bookmarks: List<Bookmark>,
     photos: List<PhotoDetail>,
     gridState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier
 ) {
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    Surface(color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = modifier.testTag("HomeScreen"),
+        color = MaterialTheme.colorScheme.background
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 16.dp)
@@ -173,7 +179,8 @@ private fun HomeContent(
                         PhotoCard(
                             cardModifier = Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight(),
+                                .wrapContentHeight()
+                                .testTag("latest_photo"),
                             imageUrl = photo.urls.regular,
                             photoDescription = photo.description,
                             onClick = { selectedPhotoId = photo.id },
@@ -191,10 +198,14 @@ private fun HomeContent(
 }
 
 @Composable
-private fun HomeSkeletonContent() {
+private fun HomeSkeletonContent(
+    modifier: Modifier = Modifier
+) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
-    Column {
+    Column(
+        modifier = modifier.testTag("home_skeleton")
+    ) {
         Spacer(Modifier.height(16.dp))
 
         Box(

@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -41,6 +42,7 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
  */
 @Composable
 fun PhotoDetailDialog(
+    modifier: Modifier = Modifier,
     photoId: String = "",
     onClose: () -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel(),
@@ -80,9 +82,10 @@ fun PhotoDetailDialog(
         )
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.7f))
+                .testTag("dialog")
         ) {
             if (uiState.isLoading) {
                 PrographyProgressIndicator()
