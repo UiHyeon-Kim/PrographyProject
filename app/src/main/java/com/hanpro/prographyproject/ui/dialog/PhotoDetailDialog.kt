@@ -88,7 +88,7 @@ fun PhotoDetailDialog(
                 .testTag("dialog")
         ) {
             if (uiState.isLoading) {
-                PrographyProgressIndicator()
+                PrographyProgressIndicator(Modifier.testTag("indicator"))
             } else if (uiState.error != null) {
                 Log.e("PhotoDetailScreen", "Error: ${uiState.error}")
             } else {

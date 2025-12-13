@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hanpro.prographyproject.common.utils.NetworkEvent
@@ -113,6 +114,7 @@ private fun RandomPhotoContent(
     ) {
         HorizontalPager(
             state = pagerState,
+            modifier = Modifier.testTag("pager"),
             contentPadding = PaddingValues(horizontal = 24.dp),
             pageSpacing = 8.dp,
         ) { page ->
@@ -151,14 +153,17 @@ private fun RandomPhotoContent(
 }
 
 @Composable
-private fun RandomSkeletonContent() {
+private fun RandomSkeletonContent(
+    modifier: Modifier = Modifier
+) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(top = 16.dp, bottom = 80.dp)
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .testTag("random_skeleton"),
         contentAlignment = Alignment.Center
     ) {
         Box(
