@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -37,8 +38,6 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 
 /**
  * 홈 화면 컴포저블로 최신 이미지 목록과 북마크 섹션을 표시하고 사진 상세 다이얼로그를 관리한다.
@@ -67,6 +66,7 @@ fun HomeScreen(
         when (networkEvent) {
             is NetworkEvent.Connected -> {
                 viewModel.retryConnection()
+                Toast.makeText(context, "네트워크가 연결되었습니다", Toast.LENGTH_SHORT).show()
             }
 
             is NetworkEvent.Disconnected -> {
@@ -82,19 +82,15 @@ fun HomeScreen(
 
     // 무한 스크롤
     LaunchedEffect(gridState) {
-        snapshotFlow { gridState.layoutInfo }
-            .map { layoutInfo ->
-                val totalItems = layoutInfo.totalItemsCount
-                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                Pair(totalItems, lastVisibleItemIndex)
-            }
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
-            .filter { (totalItems, lastVisibleItemIndex) ->
-                totalItems > 0 && lastVisibleItemIndex >= totalItems - 3
-            }
-            .collect {
-                if (!uiState.isLoading && isConnected) {
-                    val nextPage = (uiState.photos.size / 30) + 1
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex == null) return@collect
+
+                val totalItems = gridState.layoutInfo.totalItemsCount
+
+                if (lastVisibleIndex >= totalItems - 3 && !uiState.isLoading && isConnected) {
+                    val nextPage = uiState.currentPage + 1
                     viewModel.loadLatestPhotos(page = nextPage)
                 }
             }
@@ -129,10 +125,14 @@ private fun HomeContent(
     bookmarks: List<Bookmark>,
     photos: List<PhotoDetail>,
     gridState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier
 ) {
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    Surface(color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = modifier.testTag("HomeScreen"),
+        color = MaterialTheme.colorScheme.background
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 16.dp)
@@ -179,7 +179,8 @@ private fun HomeContent(
                         PhotoCard(
                             cardModifier = Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight(),
+                                .wrapContentHeight()
+                                .testTag("latest_photo"),
                             imageUrl = photo.urls.regular,
                             photoDescription = photo.description,
                             onClick = { selectedPhotoId = photo.id },
@@ -197,10 +198,14 @@ private fun HomeContent(
 }
 
 @Composable
-private fun HomeSkeletonContent() {
+private fun HomeSkeletonContent(
+    modifier: Modifier = Modifier
+) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
-    Column {
+    Column(
+        modifier = modifier.testTag("home_skeleton")
+    ) {
         Spacer(Modifier.height(16.dp))
 
         Box(

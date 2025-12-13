@@ -21,6 +21,7 @@ data class PhotoUiState(
     val photos: List<PhotoDetail> = emptyList(),
     val randomPhotos: List<PhotoDetail> = emptyList(),
     val randomPhotoIndex: Int = 0,
+    val currentPage: Int = 1,
     val isLoading: Boolean = true,
     val error: String? = null,
 )
@@ -122,7 +123,7 @@ class PhotoViewModel @Inject constructor(
         cancelRetry() // 뷰모델 종료 시 재시도 작업 취소
     }
 
-    fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 20) {
         // 네트워크 연결이 안 되어있다면 API 호출 막음
         if (!isConnected.value) {
             _uiState.update { it.copy(isLoading = false, error = "네트워크 연결이 필요합니다.") }
@@ -136,9 +137,8 @@ class PhotoViewModel @Inject constructor(
                 .onSuccess { photos ->
                     retryCount = 0
                     _uiState.update { state ->
-                        val newPhotos = if (page == 1) photos
-                        else (state.photos + photos).distinctBy { it.id }
-                        state.copy(photos = newPhotos, isLoading = false, error = null)
+                        val newPhotos = if (page == 1) photos else state.photos + photos
+                        state.copy(photos = newPhotos, currentPage = page, isLoading = false, error = null)
                     }
                 }.onFailure { e ->
                     _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }

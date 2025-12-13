@@ -6,8 +6,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 val properties = Properties().apply {
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.hanpro.prographyproject"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -73,12 +73,12 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.dagger.hilt.compiler)
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.room.compiler)
 
     // shimmer
     implementation(libs.compose.shimmer)
@@ -93,15 +93,18 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // Unit Test
+    testImplementation(libs.junit)                      // 자바 기본 테스트 라이브러리
+    testImplementation(libs.mockk)                      // 코틀린용 모킹 라이브러리
+    testImplementation(libs.kotlinx.coroutines.test)    // 코루틴 테스트용 - runTest 등
+
+    // UI Test
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
+    androidTestImplementation(libs.mockk.android)
     debugImplementation(libs.androidx.ui.test.manifest)
-}
-
-kapt {
-    correctErrorTypes = true
 }
