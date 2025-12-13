@@ -25,6 +25,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    /**
+     * Unsplash API 호출용으로 구성된 OkHttpClient를 생성합니다.
+     *
+     * 생성된 클라이언트는 요청에 `Authorization: Client-ID <키>` 헤더를 추가하고,
+     * 네트워크 응답에 `Cache-Control: public, max-age=21600`(6시간) 캐시 정책을 적용하며
+     * 애플리케이션 캐시 디렉터리 내에 50MB의 HTTP 캐시를 사용하도록 설정됩니다.
+     *
+     * @param context HTTP 및 이미지 디스크 캐시를 생성하기 위해 사용할 Application Context.
+     * @return 구성된 OkHttpClient 인스턴스.
     @Provides
     @Singleton
     fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
@@ -57,6 +66,13 @@ object AppModule {
             .build()
     }
 
+    /**
+     * 이미지를 로드하고 캐싱하도록 구성된 Coil ImageLoader를 생성해 반환한다.
+     *
+     * 네트워크 요청에 전달된 OkHttpClient를 사용하며, 메모리 캐시는 앱 가용 메모리의 25%로 제한하고 디스크 캐시는 context.cacheDir/image_cache 경로에 최대 200MB로 설정한다.
+     *
+     * @return 구성된 ImageLoader 인스턴스.
+     */
     @Provides
     @Singleton
     fun provideImageLoader(
