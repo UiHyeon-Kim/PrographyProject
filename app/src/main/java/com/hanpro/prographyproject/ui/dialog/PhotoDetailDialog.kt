@@ -40,6 +40,15 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
  * @param photoId 표시할 사진의 고유 식별자.
  * @param onClose 다이얼로그를 닫을 때 호출되는 콜백.
  */
+/**
+ * 사진 ID에 해당하는 상세 이미지를 전체 화면 다이얼로그로 표시한다.
+ *
+ * 다이얼로그가 보여지는 동안 시스템 상태 표시줄 색상을 반투명 검정으로 변경하며, photoId 변경 시 상세 정보를 로드한다. 사용자 인터랙션으로 이미지 다운로드(안드로이드 Q 미만에서는 저장 권한 요청), 북마크 추가/삭제 및 닫기 동작을 처리하고, 권한 거부나 다운로드 결과를 토스트로 알린다.
+ *
+ * @param modifier 다이얼로그 루트 레이아웃에 적용할 Modifier.
+ * @param photoId 표시할 사진의 식별자.
+ * @param onClose 다이얼로그 닫기 요청 시 호출되는 콜백.
+ */
 @Composable
 fun PhotoDetailDialog(
     modifier: Modifier = Modifier,

@@ -93,6 +93,15 @@ fun RandomPhotoScreen(
     }
 }
 
+/**
+ * 사진을 수평 페이저로 표시하고 북마크 및 상세 조회 기능을 제공합니다.
+ *
+ * @param pagerState 페이저의 상태 및 페이지 위치.
+ * @param randomPhotos 표시할 사진 목록.
+ * @param onIndexIncrement 페이지 이동 시 호출되는 콜백.
+ * @param onBookmarkAdd 사진 북마크 시 호출되는 콜백.
+ * @param isBookmarked 사진 북마크 여부를 확인하는 함수.
+ */
 @Composable
 private fun RandomPhotoContent(
     pagerState: PagerState,
@@ -152,6 +161,16 @@ private fun RandomPhotoContent(
     }
 }
 
+/**
+ * 로딩 중에 화면 전체를 채우는 쉬머(shimmer) 기반 골격 플레이스홀더를 표시합니다.
+ *
+ * 루트 레이아웃은 상태 표시줄 및 상하 패딩을 포함해 available space를 채우며,
+ * 내부 콘텐츠는 수평 패딩과 라운드된 회색 배경 위에 쉬머 애니메이션을 적용합니다.
+ *
+ * @param modifier 루트 컨테이너에 추가로 적용할 Modifier. 기본값은 Modifier입니다.
+ *
+ * 테스트 목적을 위해 뷰에 "random_skeleton" 테스트 태그가 설정됩니다.
+ */
 @Composable
 private fun RandomSkeletonContent(
     modifier: Modifier = Modifier

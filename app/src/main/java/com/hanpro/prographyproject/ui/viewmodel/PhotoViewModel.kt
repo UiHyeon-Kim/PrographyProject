@@ -118,11 +118,25 @@ class PhotoViewModel @Inject constructor(
         retryJob = null
     }
 
+    /**
+     * ViewModel이 소멸될 때 호출되어 진행 중인 자동 재시도 작업을 취소한다.
+     *
+     * 이 메서드는 뷰모델 종료 시점에 등록된 재시도 Job을 종료해 추가 백그라운드 시도를 중단한다.
+     */
     override fun onCleared() {
         super.onCleared()
         cancelRetry() // 뷰모델 종료 시 재시도 작업 취소
     }
 
+    /**
+     * 최신 사진 목록을 불러와 UI 상태를 갱신합니다.
+     *
+     * 네트워크 연결이 없으면 즉시 에러 상태를 설정하고 호출을 중단합니다. 호출이 성공하면
+     * page가 1일 때 기존 목록을 교체하고, 그렇지 않으면 기존 목록에 이어 붙이며 currentPage, isLoading, error를 갱신합니다.
+     *
+     * @param page 불러올 페이지 번호 (기본값 1).
+     * @param perPage 한 페이지당 가져올 사진 수 (기본값 20).
+     */
     fun loadLatestPhotos(page: Int = 1, perPage: Int = 20) {
         // 네트워크 연결이 안 되어있다면 API 호출 막음
         if (!isConnected.value) {
