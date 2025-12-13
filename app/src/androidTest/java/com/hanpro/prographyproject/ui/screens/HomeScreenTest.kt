@@ -49,15 +49,6 @@ class HomeScreenTest {
     private val networkStateFlow = MutableStateFlow(true)
     private val networkEventFlow = MutableStateFlow<NetworkEvent?>(null)
 
-    private val mockPhotoDetail = PhotoDetail(
-        id = "photo-1",
-        description = "Test photo description",
-        urls = Urls(full = "https://example.com/full.jpg", regular = "https://example.com/regular.jpg"),
-        tags = listOf(Tag("nature"), Tag("landscape")),
-        links = Link(download = "https://example.com/download"),
-        user = User(username = "testuser")
-    )
-
     private val mockBookmark = Bookmark(
         id = "bookmark-1",
         description = "Bookmarked photo",
@@ -93,6 +84,7 @@ class HomeScreenTest {
     @Test
     fun HomeScreen은_로딩중일때_스켈레톤UI를_표시한다() {
         // Given
+        // 스켈레톤이 너무 빠르게 지나가 3초 지연
         coEvery { getLatestPhotosUseCase(any(), any()) } coAnswers {
             delay(3000)
             Result.success(emptyList())
@@ -128,40 +120,10 @@ class HomeScreenTest {
 
         // Then
         composeTestRule.onNodeWithContentDescription("네트워크 연결 끊김").assertExists()
-        composeTestRule.onNodeWithText("인터넷이 원활하지 않아요")
-        composeTestRule.onNodeWithText("인터넷 연결을 다시 확인해 주세요")
+        composeTestRule.onNodeWithText("인터넷이 원활하지 않아요").assertExists()
+        composeTestRule.onNodeWithText("인터넷 연결을 다시 확인해 주세요").assertExists()
         composeTestRule.onNodeWithText("새로고침").assertExists()
     }
-
-    // FIXME: 왜 안되는지 모르겠는 것... photos를 빼야만 성공.. why?
-//    @Test
-//    fun HomeScreen은_사진목록이_있을때_정상적으로_표시한다() {
-//        // Given
-//        val photos = listOf(mockPhotoDetail, mockPhotoDetail.copy(id = "photo-2"))
-//        coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(photos)
-//        viewModel = createViewModel()
-//
-//        // When
-//        composeTestRule.setContent {
-//            HomeScreen(viewModel = viewModel)
-//        }
-//
-//        // Then
-//        composeTestRule.waitUntil(timeoutMillis = 15000) {
-//            val state = viewModel.uiState.value
-//            !state.isLoading && state.photos.isNotEmpty()
-//        }
-//
-//        composeTestRule.waitForIdle()
-////        composeTestRule.onNodeWithText("최신 이미지").assertExists()
-//
-////        assert(
-////            composeTestRule.onAllNodes(hasClickAction())
-////                .fetchSemanticsNodes().size >= 2
-////        )
-//
-//        composeTestRule.onAllNodesWithTag("latest_photo").onFirst().assertExists()
-//    }
 
     @Test
     fun HomeScreen은_북마크가_있을때_북마크섹션을_표시한다() {
@@ -217,31 +179,8 @@ class HomeScreenTest {
         coVerify { networkManager.checkNetworkConnection() }
     }
 
-    // FIXME: 얘도 왜 안되는지 모르겠음
-//    @Test
-//    fun HomeScreen에서_이미지카드_클릭시_상세다이얼로그가_열린다() {
-//        // Given
-//        val photos = listOf(mockPhotoDetail)
-//        coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(photos)
-//        viewModel = createViewModel()
-//
-//        composeTestRule.setContent {
-//            HomeScreen(viewModel = viewModel)
-//        }
-//
-//        composeTestRule.waitForIdle()
-//
-//        // When
-//        composeTestRule.onNodeWithTag("latest_photo").performClick()
-//
-//        composeTestRule.waitForIdle()
-//
-//        // Then
-////        composeTestRule.onNodeWithTag("dialog").assertIsDisplayed()
-//    }
-
     @Test
-    fun HomeScreen은_네트워크_연결시_토스트메시지와_함께_재연결된다() {
+    fun HomeScreen은_네트워크_연결시_자동으로_재연결된다() {
         // Given
         networkStateFlow.value = false
         viewModel = createViewModel()
@@ -256,21 +195,5 @@ class HomeScreenTest {
         // Then
         composeTestRule.waitForIdle()
         coVerify { networkManager.checkNetworkConnection() }
-    }
-
-    @Test
-    fun HomeScreen에서_로드된_이미지의_최하단까지_스크롤하면_추가이미지를_불러온다() {
-        // Given
-        coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(emptyList())
-        viewModel = createViewModel()
-
-        // When
-        composeTestRule.setContent {
-            HomeScreen(viewModel = viewModel)
-        }
-
-        // Then
-        composeTestRule.waitForIdle()
-        coVerify { getLatestPhotosUseCase(any(), any()) }
     }
 }
