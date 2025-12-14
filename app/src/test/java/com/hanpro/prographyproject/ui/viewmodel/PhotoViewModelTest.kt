@@ -8,14 +8,8 @@ import com.hanpro.prographyproject.data.model.Urls
 import com.hanpro.prographyproject.data.model.User
 import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.domain.usecase.*
-import io.mockk.MockKAnnotations
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
-import io.mockk.just
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -361,7 +355,7 @@ class PhotoViewModelTest {
     }
 
     @Test
-    fun `deleteBookmarksms UseCase를 호출한다`() = runTest {
+    fun `deleteBookmark는 UseCase를 호출한다`() = runTest {
         // Given
         coEvery { deleteBookmarkUseCase(any()) } returns Unit
         viewModel = createViewModel()

@@ -1,5 +1,7 @@
 package com.hanpro.prographyproject.ui.screens
 
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.hanpro.prographyproject.common.utils.NetworkEvent
@@ -148,16 +150,25 @@ class RandomPhotoScreenTest {
             mockPhotoDetail.copy(id = "photo-2")
         )
         coEvery { getRandomPhotosUseCase(any()) } returns Result.success(photos)
-        coEvery { addBookmarkUseCase(any()) } returns Unit
+
         viewModel = createViewModel()
 
+        lateinit var pagerState: PagerState
+
         composeTestRule.setContent {
-            RandomPhotoScreen(viewModel = viewModel)
+            pagerState = rememberPagerState(pageCount = { photos.size })
+
+            RandomPhotoScreen(viewModel = viewModel, pagerState = pagerState)
         }
 
-        composeTestRule.waitForIdle()
+        composeTestRule.mainClock.autoAdvance = false
 
         // When
-        composeTestRule.onRoot().performTouchInput { swipeLeft() }
+        composeTestRule.onNodeWithTag("pager").performTouchInput { swipeLeft() }
+        composeTestRule.mainClock.advanceTimeBy(1000)
+        composeTestRule.waitForIdle()
+
+        // Then
+        assert(1 == pagerState.currentPage)
     }
 }

@@ -17,7 +17,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class PhotoDetailDialog {
+class PhotoDetailDialogTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()

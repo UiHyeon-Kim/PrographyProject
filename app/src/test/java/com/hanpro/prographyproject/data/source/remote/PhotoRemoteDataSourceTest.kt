@@ -120,7 +120,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getLatestPhotos(page, perPage) }
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
     @Test
@@ -138,7 +138,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getLatestPhotos(page, perPage) }
+        coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
     @Test
@@ -240,7 +240,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getRandomPhotos(count) }
+        coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
     @Test
@@ -326,7 +326,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
     @Test
@@ -343,7 +343,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
     @Test
@@ -360,7 +360,7 @@ class PhotoRemoteDataSourceTest {
         // Then
         assert(result.isFailure)
         assert(exception == result.exceptionOrNull())
-        coEvery { unsplashApiService.getPhotoDetail(photoId) }
+        coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
     @Test

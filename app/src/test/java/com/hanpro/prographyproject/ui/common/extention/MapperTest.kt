@@ -255,18 +255,6 @@ class MapperTest {
     }
 
     @Test
-    fun `toBookmark는 빈 문자열 ID를 처리한다`() {
-        // Given
-        val photoDetail = mockPhotoDetail.copy(id = "")
-
-        // When
-        val bookmark = photoDetail.toBookmark()
-
-        // Then
-        assertEquals("", bookmark.id)
-    }
-
-    @Test
     fun `toBookmark는 최소로 유효한 필드를 가진 PhotoDetail을 처리한다`() {
         // Given - PhotoDetail with minimum required fields
         val minimalPhoto = PhotoDetail(

@@ -153,6 +153,7 @@ class GetPhotoDetailUseCaseTest {
 
         // Then
         assert(result.isFailure)
+        assert(exception == result.exceptionOrNull())
     }
 
     @Test
