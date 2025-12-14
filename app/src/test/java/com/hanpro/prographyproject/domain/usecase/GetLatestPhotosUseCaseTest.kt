@@ -36,25 +36,6 @@ class GetLatestPhotosUseCaseTest {
     }
 
     @Test
-    fun `Repository가 성공을 반환할 때 Invoke는 성공을 반환한다`() = runTest {
-        // Given
-        val page = 1
-        val perPage = 30
-        val mockPhotos = listOf(mockPhotoDetail)
-        val successResult = Result.success(mockPhotos)
-
-        coEvery { photoRepository.getLatestPhotos(page, perPage) } returns successResult
-
-        // When
-        val result = getLatestPhotosUseCase(page, perPage)
-
-        // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
-        coVerify { photoRepository.getLatestPhotos(page, perPage) }
-    }
-
-    @Test
     fun `Repository가 성공을 반환할 때 UseCase는 성공을 반환한다`() = runTest {
         // Given
         val page = 1

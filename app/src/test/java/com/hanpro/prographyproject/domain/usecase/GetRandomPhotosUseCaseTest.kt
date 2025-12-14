@@ -100,7 +100,7 @@ class GetRandomPhotosUseCaseTest {
 
         // Then
         assert(result.isSuccess)
-        assert(result.getOrNull()!!.isEmpty())
+        assert(result.getOrNull()?.isEmpty() == true)
     }
 
     @Test
@@ -187,7 +187,9 @@ class GetRandomPhotosUseCaseTest {
         val firstBatch = List(count) { mockPhotoDetail.copy(id = "first-$it") }
         val secondBatch = List(count) { mockPhotoDetail.copy(id = "second-$it") }
 
-        coEvery { photoRepository.getRandomPhotos(count) } returns Result.success(firstBatch) andThen Result.success(secondBatch)
+        coEvery { photoRepository.getRandomPhotos(count) } returns Result.success(firstBatch) andThen Result.success(
+            secondBatch
+        )
 
         // When
         val result1 = getRandomPhotosUseCase(count)

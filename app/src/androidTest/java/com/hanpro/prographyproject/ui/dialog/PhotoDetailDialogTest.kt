@@ -8,6 +8,7 @@ import com.hanpro.prographyproject.domain.usecase.AddBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.DeleteBookmarkUseCase
 import com.hanpro.prographyproject.domain.usecase.GetBookmarksUseCase
 import com.hanpro.prographyproject.domain.usecase.GetPhotoDetailUseCase
+import com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -59,8 +60,8 @@ class PhotoDetailDialogTest {
         coEvery { getPhotoDetailUseCase(any()) } returns Result.success(mockPhotoDetail)
     }
 
-    private fun createViewModel(): com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel {
-        return com.hanpro.prographyproject.ui.viewmodel.PhotoDetailViewModel(
+    private fun createViewModel(): PhotoDetailViewModel {
+        return PhotoDetailViewModel(
             getPhotoDetailUseCase,
             getBookmarksUseCase,
             addBookmarkUseCase,
@@ -72,7 +73,7 @@ class PhotoDetailDialogTest {
     fun photoDetailDialog는_로딩중일때_로딩인디케이터를_표시한다() {
         // Given
         coEvery { getPhotoDetailUseCase(any()) } coAnswers {
-            kotlinx.coroutines.delay(10000)
+            kotlinx.coroutines.delay(1000)
             Result.success(mockPhotoDetail)
         }
         viewModel = createViewModel()
@@ -153,7 +154,7 @@ class PhotoDetailDialogTest {
         composeTestRule.waitForIdle()
 
         // When - 북마크 버튼 클릭
-        composeTestRule.onAllNodesWithContentDescription("bookmark").onLast().performClick()
+        composeTestRule.onNodeWithContentDescription("bookmark").performClick()
 
         // Then
         composeTestRule.waitForIdle()
@@ -178,7 +179,7 @@ class PhotoDetailDialogTest {
         composeTestRule.waitForIdle()
 
         // When - 북마크 버튼 클릭
-        composeTestRule.onAllNodesWithContentDescription("bookmark").onLast().performClick()
+        composeTestRule.onNodeWithContentDescription("bookmark").performClick()
 
         // Then
         composeTestRule.waitForIdle()
@@ -223,6 +224,8 @@ class PhotoDetailDialogTest {
         // Then
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("photographer123").assertExists()
+        composeTestRule.onNodeWithText("nature").assertDoesNotExist()
+        composeTestRule.onNodeWithText("#nature #mountains #landscape").assertDoesNotExist()
     }
 
     @Test
@@ -244,5 +247,6 @@ class PhotoDetailDialogTest {
         // Then
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText("photographer123").assertExists()
+        composeTestRule.onNodeWithText("Detailed photo description").assertDoesNotExist()
     }
 }

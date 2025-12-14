@@ -11,6 +11,7 @@ import com.hanpro.prographyproject.domain.usecase.*
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,9 +61,9 @@ class RandomPhotoScreenTest {
     fun setup() {
         MockKAnnotations.init(this, relaxed = true, relaxUnitFun = true)
 
-        coEvery { networkManager.networkState } returns networkStateFlow
-        coEvery { networkManager.networkEvent } returns networkEventFlow
-        coEvery { networkManager.checkNetworkConnection() } returns true
+        every { networkManager.networkState } returns networkStateFlow
+        every { networkManager.networkEvent } returns networkEventFlow
+        every { networkManager.checkNetworkConnection() } returns true
 
         coEvery { getBookmarksUseCase() } returns flowOf(emptyList())
         coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(emptyList())
@@ -84,12 +85,12 @@ class RandomPhotoScreenTest {
     fun randomPhotoScreen은_로딩중일때_스켈레톤UI를_표시한다() {
         // Given
         coEvery { getLatestPhotosUseCase(any(), any()) } coAnswers {
-            delay(3000)
+            delay(1000)
             Result.success(emptyList())
         }
 
         coEvery { getRandomPhotosUseCase(any()) } coAnswers {
-            delay(3000)
+            delay(1000)
             Result.success(emptyList())
         }
 
@@ -139,7 +140,7 @@ class RandomPhotoScreenTest {
 
         // Then
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("pager")
+        composeTestRule.onNodeWithTag("pager").assertIsDisplayed()
     }
 
     @Test
