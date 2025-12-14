@@ -20,8 +20,16 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.util.concurrent.TimeUnit
-import javax.inject.Named
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ApiClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ImageClient
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -29,10 +37,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    @Named("apiClient")
+    @ApiClient
     fun provideApiOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+            else HttpLoggingInterceptor.Level.NONE
+            redactHeader("Authorization")
         }
 
         val cache = Cache(
@@ -41,7 +51,7 @@ object AppModule {
         )
 
         return OkHttpClient.Builder()
-//            .addInterceptor(logging)
+            .addInterceptor(logging)
             .connectTimeout(20, TimeUnit.SECONDS)   // 서버와 TCP를 연결하는데 걸리는 시간 제한
             .readTimeout(20, TimeUnit.SECONDS)      // 응답 데이터를 읽는 시간 제한
             .writeTimeout(20, TimeUnit.SECONDS)     // 요청 데이터를 소켓에 쓰는 시간 제한
@@ -64,7 +74,7 @@ object AppModule {
      */
     @Provides
     @Singleton
-    @Named("imageClient")
+    @ImageClient
     fun provideImageOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
 
         val cache = Cache(
@@ -84,7 +94,7 @@ object AppModule {
     @Singleton
     fun provideImageLoader(
         @ApplicationContext context: Context,
-        @Named("imageClient") imageClient: OkHttpClient
+        @ImageClient imageClient: OkHttpClient
     ): ImageLoader {
         return ImageLoader.Builder(context)
             .components {
@@ -100,7 +110,7 @@ object AppModule {
             .diskCache {
                 DiskCache.Builder()
                     .directory(context.cacheDir.resolve("image_cache"))
-                    .maxSizeBytes(200L * 1024 * 1024) // 200 MB
+                    .maxSizeBytes(100L * 1024 * 1024) // 100 MB
                     .build()
             }
 //            .logger(DebugLogger())
@@ -110,7 +120,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideRetrofit(
-        @Named("apiClient") client: OkHttpClient
+        @ApiClient client: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.unsplash.com/")
