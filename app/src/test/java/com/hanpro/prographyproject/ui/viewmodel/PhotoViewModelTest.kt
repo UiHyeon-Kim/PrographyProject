@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -106,11 +109,11 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.bookmarks.isEmpty())
-        assert(state.photos.isEmpty())
-        assert(state.randomPhotos.isEmpty())
-        assert(0 == state.randomPhotoIndex)
-        assert(state.isLoading)
+        assertTrue(state.bookmarks.isEmpty())
+        assertTrue(state.photos.isEmpty())
+        assertTrue(state.randomPhotos.isEmpty())
+        assertTrue(0 == state.randomPhotoIndex)
+        assertTrue(state.isLoading)
         assertNull(state.error)
     }
 
@@ -133,8 +136,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(photos == state.photos)
-        assert(!state.isLoading)
+        assertEquals(photos, state.photos)
+        assertFalse(state.isLoading)
         assertNull(state.error)
     }
 
@@ -154,9 +157,9 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.photos.isEmpty())
-        assert(!state.isLoading)
-        assert(errorMessage == state.error)
+        assertTrue(state.photos.isEmpty())
+        assertFalse(state.isLoading)
+        assertEquals(errorMessage, state.error)
     }
 
     @Test
@@ -179,9 +182,9 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(2 == state.photos.size)
-        assert(state.photos.any { it.id == "photo-1" })
-        assert(state.photos.any { it.id == "photo-2" })
+        assertTrue(2 == state.photos.size)
+        assertTrue(state.photos.any { it.id == "photo-1" })
+        assertTrue(state.photos.any { it.id == "photo-2" })
     }
 
     @Test
@@ -203,8 +206,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(1 == state.photos.size)
-        assert("new-1" == state.photos[0].id)
+        assertTrue(1 == state.photos.size)
+        assertTrue("new-1" == state.photos[0].id)
     }
 
     @Test
@@ -229,8 +232,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(2 == state.photos.size)
-        assert(listOf("photo-1", "photo-2") == state.photos.map { it.id })
+        assertTrue(2 == state.photos.size)
+        assertEquals(listOf("photo-1", "photo-2"), state.photos.map { it.id })
     }
 
     @Test
@@ -248,8 +251,8 @@ class PhotoViewModelTest {
         coVerify(exactly = 0) { getLatestPhotosUseCase.invoke(any(), any()) }
 
         val state = viewModel.uiState.value
-        assert(!state.isLoading)
-        assert("네트워크 연결이 필요합니다." == state.error)
+        assertFalse(state.isLoading)
+        assertTrue("네트워크 연결이 필요합니다." == state.error)
     }
 
 
@@ -271,8 +274,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.randomPhotos.contains(mockPhotoDetail.copy(id = "random-1")))
-        assert(!state.isLoading)
+        assertTrue(state.randomPhotos.contains(mockPhotoDetail.copy(id = "random-1")))
+        assertFalse(state.isLoading)
         assertNull(state.error)
     }
 
@@ -296,7 +299,7 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(2 <= state.randomPhotos.size)
+        assertTrue(2 <= state.randomPhotos.size)
     }
 
     @Test
@@ -313,9 +316,9 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.randomPhotos.isEmpty())
-        assert(!state.isLoading)
-        assert(errorMessage == state.error)
+        assertTrue(state.randomPhotos.isEmpty())
+        assertFalse(state.isLoading)
+        assertEquals(errorMessage, state.error)
     }
 
     @Test
@@ -333,8 +336,8 @@ class PhotoViewModelTest {
         coVerify(exactly = 0) { getRandomPhotosUseCase.invoke(any()) }
 
         val state = viewModel.uiState.value
-        assert(!state.isLoading)
-        assert("네트워크 연결이 필요합니다." == state.error)
+        assertFalse(state.isLoading)
+        assertTrue("네트워크 연결이 필요합니다." == state.error)
     }
 
 
@@ -381,7 +384,7 @@ class PhotoViewModelTest {
         val isBookmarked = viewModel.isBookmarked("photo-1")
 
         // Then
-        assert(isBookmarked)
+        assertTrue(isBookmarked)
     }
 
     @Test
@@ -395,7 +398,7 @@ class PhotoViewModelTest {
         val isBookmarked = viewModel.isBookmarked("photo-1")
 
         // Then
-        assert(!isBookmarked)
+        assertFalse(isBookmarked)
     }
 
 
@@ -412,7 +415,7 @@ class PhotoViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(1 == viewModel.uiState.value.randomPhotoIndex)
+        assertTrue(1 == viewModel.uiState.value.randomPhotoIndex)
     }
 
     @Test
@@ -427,7 +430,7 @@ class PhotoViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(5 == viewModel.uiState.value.randomPhotoIndex)
+        assertTrue(5 == viewModel.uiState.value.randomPhotoIndex)
     }
 
     // NetworkEvent 테스트
@@ -496,7 +499,7 @@ class PhotoViewModelTest {
 
         // Then
         coVerify { getLatestPhotosUseCase(page, perPage) }
-        assert(photos == viewModel.uiState.value.photos)
+        assertEquals(photos, viewModel.uiState.value.photos)
     }
 
     @Test
@@ -511,8 +514,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.photos.isEmpty())
-        assert(!state.isLoading)
+        assertTrue(state.photos.isEmpty())
+        assertFalse(state.isLoading)
         assertNull(state.error)
     }
 
@@ -528,8 +531,8 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.randomPhotos.isEmpty())
-        assert(!state.isLoading)
+        assertTrue(state.randomPhotos.isEmpty())
+        assertFalse(state.isLoading)
         assertNull(state.error)
     }
 
@@ -547,8 +550,8 @@ class PhotoViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(1 == viewModel.uiState.value.bookmarks.size)
-        assert(mockBookmark == viewModel.uiState.value.bookmarks[0])
+        assertTrue(1 == viewModel.uiState.value.bookmarks.size)
+        assertEquals(mockBookmark, viewModel.uiState.value.bookmarks[0])
     }
 
     @Test
@@ -578,7 +581,7 @@ class PhotoViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(photos == state.photos)
-        assert(state.randomPhotos.any { it.id == "random-1" })
+        assertEquals(photos, state.photos)
+        assertTrue(state.randomPhotos.any { it.id == "random-1" })
     }
 }

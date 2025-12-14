@@ -11,6 +11,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -49,8 +51,8 @@ class GetLatestPhotosUseCaseTest {
         val result = getLatestPhotosUseCase(page, perPage)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { photoRepository.getLatestPhotos(page, perPage) }
     }
 
@@ -68,8 +70,8 @@ class GetLatestPhotosUseCaseTest {
         val result = getLatestPhotosUseCase(page, perPage)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRepository.getLatestPhotos(page, perPage) }
     }
 
@@ -103,8 +105,8 @@ class GetLatestPhotosUseCaseTest {
         val result = getLatestPhotosUseCase(page, perPage)
 
         // Then
-        assert(result.isSuccess)
-        assert(emptyList<PhotoDetail>() == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(emptyList<PhotoDetail>(), result.getOrNull())
         coVerify { photoRepository.getLatestPhotos(page, perPage) }
     }
 
@@ -123,8 +125,8 @@ class GetLatestPhotosUseCaseTest {
             val result = getLatestPhotosUseCase(page, perPage)
 
             // Then
-            assert(result.isSuccess)
-            assert(emptyList<PhotoDetail>() == result.getOrNull())
+            assertTrue(result.isSuccess)
+            assertEquals(emptyList<PhotoDetail>(), result.getOrNull())
             coVerify { photoRepository.getLatestPhotos(page, perPage) }
         }
     }
@@ -144,7 +146,7 @@ class GetLatestPhotosUseCaseTest {
             val result = getLatestPhotosUseCase(page, perPage)
 
             // Then
-            assert(result.isSuccess)
+            assertTrue(result.isSuccess)
             coVerify { photoRepository.getLatestPhotos(page, perPage) }
         }
     }
@@ -163,8 +165,8 @@ class GetLatestPhotosUseCaseTest {
         val result = getLatestPhotosUseCase(page, perPage)
 
         // Then
-        assert(result.isSuccess)
-        assert(perPage == result.getOrNull()?.size)
+        assertTrue(result.isSuccess)
+        assertEquals(perPage, result.getOrNull()?.size)
         coVerify { photoRepository.getLatestPhotos(page, perPage) }
     }
 
@@ -185,8 +187,8 @@ class GetLatestPhotosUseCaseTest {
         val result2 = getLatestPhotosUseCase(page2, perPage)
 
         // Then
-        assert(photos1 == result1.getOrNull())
-        assert(photos2 == result2.getOrNull())
+        assertEquals(photos1, result1.getOrNull())
+        assertEquals(photos2, result2.getOrNull())
         coVerify { photoRepository.getLatestPhotos(page1, perPage) }
         coVerify { photoRepository.getLatestPhotos(page2, perPage) }
     }

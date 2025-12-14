@@ -18,8 +18,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -121,9 +124,9 @@ class PhotoDetailViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.photo == mockPhotoDetail)
-        assert(!state.isLoading)
-        assert(!state.isBookmarked)
+        assertEquals(state.photo, mockPhotoDetail)
+        assertFalse(state.isLoading)
+        assertFalse(state.isBookmarked)
         assertNull(state.error)
     }
 
@@ -142,9 +145,9 @@ class PhotoDetailViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.photo == mockPhotoDetail)
-        assert(!state.isLoading)
-        assert(state.isBookmarked)
+        assertEquals(state.photo, mockPhotoDetail)
+        assertFalse(state.isLoading)
+        assertTrue(state.isBookmarked)
         assertNull(state.error)
     }
 
@@ -163,9 +166,9 @@ class PhotoDetailViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertNull(state.photo)
-        assert(!state.isLoading)
-        assert(errorMessage == state.error)
-        assert(!state.isBookmarked)
+        assertFalse(state.isLoading)
+        assertEquals(errorMessage, state.error)
+        assertFalse(state.isBookmarked)
     }
 
     @Test
@@ -181,7 +184,7 @@ class PhotoDetailViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(!state.isLoading)
+        assertFalse(state.isLoading)
         assertNull(state.error)
     }
 
@@ -204,9 +207,9 @@ class PhotoDetailViewModelTest {
 
         // Then
         val state = viewModel.uiState.value
-        assert(state.photo == mockPhotoDetail)
-        assert(!state.isLoading)
-        assert(state.isBookmarked)
+        assertEquals(state.photo, mockPhotoDetail)
+        assertFalse(state.isLoading)
+        assertTrue(state.isBookmarked)
     }
 
     @Test
@@ -231,8 +234,8 @@ class PhotoDetailViewModelTest {
         val state2 = viewModel.uiState.value
 
         // Then
-        assert(state1.photo?.id == photoId1)
-        assert(state2.photo?.id == photoId2)
+        assertEquals(state1.photo?.id, photoId1)
+        assertEquals(state2.photo?.id, photoId2)
     }
 
 
@@ -248,7 +251,7 @@ class PhotoDetailViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(viewModel.uiState.value.isBookmarked)
+        assertTrue(viewModel.uiState.value.isBookmarked)
         coVerify { addBookmarkUseCase(any()) }
     }
 
@@ -299,7 +302,7 @@ class PhotoDetailViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(viewModel.uiState.value.isBookmarked)
+        assertTrue(viewModel.uiState.value.isBookmarked)
     }
 
 
@@ -319,7 +322,7 @@ class PhotoDetailViewModelTest {
 
         // Then
         coVerify { deleteBookmarkUseCase.invoke(any()) }
-        assert(!viewModel.uiState.value.isBookmarked)
+        assertFalse(viewModel.uiState.value.isBookmarked)
     }
 
     @Test
@@ -370,7 +373,7 @@ class PhotoDetailViewModelTest {
         advanceUntilIdle()
 
         // Then
-        assert(!viewModel.uiState.value.isBookmarked)
+        assertFalse(viewModel.uiState.value.isBookmarked)
     }
 
 
@@ -393,12 +396,12 @@ class PhotoDetailViewModelTest {
         // 북마크 삭제
         viewModel.deleteBookmark(mockPhotoDetail)
         advanceUntilIdle()
-        assert(!viewModel.uiState.value.isBookmarked)
+        assertFalse(viewModel.uiState.value.isBookmarked)
 
         // 다시 추가
         viewModel.addBookmark(mockPhotoDetail)
         advanceUntilIdle()
-        assert(viewModel.uiState.value.isBookmarked)
+        assertTrue(viewModel.uiState.value.isBookmarked)
     }
 
     @Test
@@ -406,9 +409,9 @@ class PhotoDetailViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertNull(state.photo)
-        assert(state.isLoading)
+        assertTrue(state.isLoading)
         assertNull(state.error)
-        assert(!state.isBookmarked)
+        assertFalse(state.isBookmarked)
     }
 
     @Test

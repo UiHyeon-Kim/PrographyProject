@@ -11,6 +11,9 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -48,8 +51,8 @@ class GetRandomPhotosUseCaseTest {
         val result = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { photoRepository.getRandomPhotos(count) }
     }
 
@@ -66,8 +69,8 @@ class GetRandomPhotosUseCaseTest {
         val result = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRepository.getRandomPhotos(count) }
     }
 
@@ -99,8 +102,8 @@ class GetRandomPhotosUseCaseTest {
         val result = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(result.getOrNull()?.isEmpty() == true)
+        assertTrue(result.isSuccess)
+        assertTrue(result.getOrNull()?.isEmpty() == true)
     }
 
     @Test
@@ -118,8 +121,8 @@ class GetRandomPhotosUseCaseTest {
             val result = getRandomPhotosUseCase(count)
 
             // Then
-            assert(result.isSuccess)
-            assert(count == result.getOrNull()?.size)
+            assertTrue(result.isSuccess)
+            assertEquals(count, result.getOrNull()?.size)
             coVerify { photoRepository.getRandomPhotos(count) }
         }
     }
@@ -137,8 +140,8 @@ class GetRandomPhotosUseCaseTest {
         val result = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(count == result.getOrNull()?.size)
+        assertTrue(result.isSuccess)
+        assertEquals(count, result.getOrNull()?.size)
     }
 
     @Test
@@ -154,8 +157,8 @@ class GetRandomPhotosUseCaseTest {
         val result = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(count == result.getOrNull()?.size)
+        assertTrue(result.isSuccess)
+        assertEquals(count, result.getOrNull()?.size)
     }
 
     @Test
@@ -174,8 +177,8 @@ class GetRandomPhotosUseCaseTest {
         val result2 = getRandomPhotosUseCase(count2)
 
         // Then
-        assert(count1 == result1.getOrNull()?.size)
-        assert(count2 == result2.getOrNull()?.size)
+        assertEquals(count1, result1.getOrNull()?.size)
+        assertEquals(count2, result2.getOrNull()?.size)
         coVerify { photoRepository.getRandomPhotos(count1) }
         coVerify { photoRepository.getRandomPhotos(count2) }
     }
@@ -196,7 +199,7 @@ class GetRandomPhotosUseCaseTest {
         val result2 = getRandomPhotosUseCase(count)
 
         // Then
-        assert(result1.getOrNull() != result2.getOrNull())
+        assertNotEquals(result1.getOrNull(), result2.getOrNull())
         coVerify(exactly = 2) { photoRepository.getRandomPhotos(count) }
     }
 }

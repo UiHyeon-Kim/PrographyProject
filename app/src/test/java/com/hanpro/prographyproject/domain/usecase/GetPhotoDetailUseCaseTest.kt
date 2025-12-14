@@ -8,7 +8,9 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -45,8 +47,8 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetail == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetail, result.getOrNull())
         coVerify { photoRepository.getPhotoDetail(photoId) }
     }
 
@@ -63,8 +65,8 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRepository.getPhotoDetail(photoId) }
     }
 
@@ -97,7 +99,7 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         assertNull(result.getOrNull()?.description)
     }
 
@@ -114,7 +116,7 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         assertNull(result.getOrNull()?.tags)
     }
 
@@ -133,8 +135,8 @@ class GetPhotoDetailUseCaseTest {
             val result = getPhotoDetailUseCase(photoId)
 
             // Then
-            assert(result.isSuccess)
-            assert(photoId == result.getOrNull()?.id)
+            assertTrue(result.isSuccess)
+            assertEquals(photoId, result.getOrNull()?.id)
             coVerify { photoRepository.getPhotoDetail(photoId) }
         }
     }
@@ -143,17 +145,15 @@ class GetPhotoDetailUseCaseTest {
     fun `UseCase는 빈 문자열 ID를 받으면 에러를 반환한다`() = runTest {
         // Given
         val photoId = ""
-        val exception = IllegalArgumentException("Photo ID cannot be empty")
-        val failureResult = Result.failure<PhotoDetail>(exception)
-
-        coEvery { photoRepository.getPhotoDetail(photoId) } returns failureResult
 
         // When
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
+        val exception = result.exceptionOrNull()
         assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assert(exception is IllegalArgumentException)
+        assertEquals("Photo ID cannot be empty", exception?.message)
     }
 
     @Test
@@ -172,8 +172,8 @@ class GetPhotoDetailUseCaseTest {
         val result2 = getPhotoDetailUseCase(photoId2)
 
         // Then
-        assert(photoId1 == result1.getOrNull()?.id)
-        assert(photoId2 == result2.getOrNull()?.id)
+        assertEquals(photoId1, result1.getOrNull()?.id)
+        assertEquals(photoId2, result2.getOrNull()?.id)
         coVerify { photoRepository.getPhotoDetail(photoId1) }
         coVerify { photoRepository.getPhotoDetail(photoId2) }
     }
@@ -191,8 +191,8 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(result.exceptionOrNull() is java.net.SocketTimeoutException)
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is java.net.SocketTimeoutException)
     }
 
     @Test
@@ -208,7 +208,7 @@ class GetPhotoDetailUseCaseTest {
         val result = getPhotoDetailUseCase(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(result.exceptionOrNull()?.message?.contains("404") == true)
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull()?.message?.contains("404") == true)
     }
 }

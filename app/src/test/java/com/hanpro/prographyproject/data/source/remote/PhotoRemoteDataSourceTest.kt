@@ -8,7 +8,9 @@ import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
@@ -65,8 +67,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isSuccess) // 응답 성공했는지
-        assert(mockResponse == result.getOrNull()) // result 값이 mockResponse 와 동일한지
+        assertTrue(result.isSuccess) // 응답 성공했는지
+        assertEquals(mockResponse, result.getOrNull()) // result 값이 mockResponse 와 동일한지
 
         // verify: Mock 객체의 특정 메서드가 정확히 호출되었는지 확인. 시그니처까지 체크해 의도대로 동작했는지를 보장함
         // 이게 없으면 DataSource 내부에서 API를 호출 안해도 테스트 통과할 수 있음
@@ -85,8 +87,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isSuccess)
-        assert(emptyList<PhotoDetail>() == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(emptyList<PhotoDetail>(), result.getOrNull())
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
@@ -101,7 +103,7 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos()
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         coVerify { unsplashApiService.getLatestPhotos(1, 30) }
     }
 
@@ -118,8 +120,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
@@ -136,8 +138,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
@@ -154,7 +156,7 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
@@ -171,7 +173,7 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         coVerify { unsplashApiService.getLatestPhotos(page, perPage) }
     }
 
@@ -190,8 +192,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -206,7 +208,7 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos()
 
         // Then
-        assert(result.isSuccess)
+        assertTrue(result.isSuccess)
         coVerify { unsplashApiService.getRandomPhotos() }
     }
 
@@ -221,8 +223,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(emptyList<PhotoDetail>() == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(emptyList<PhotoDetail>(), result.getOrNull())
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -238,8 +240,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -255,8 +257,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(count == result.getOrNull()?.size)
+        assertTrue(result.isSuccess)
+        assertEquals(count, result.getOrNull()?.size)
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -272,8 +274,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -288,8 +290,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(count == result.getOrNull()?.size)
+        assertTrue(result.isSuccess)
+        assertEquals(count, result.getOrNull()?.size)
         coVerify { unsplashApiService.getRandomPhotos(count) }
     }
 
@@ -307,8 +309,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetail == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetail, result.getOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -324,8 +326,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -341,8 +343,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -358,8 +360,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -374,8 +376,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetail == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetail, result.getOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -391,8 +393,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetailWithNullDescription == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetailWithNullDescription, result.getOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -408,8 +410,8 @@ class PhotoRemoteDataSourceTest {
         val result = photoRemoteDataSource.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetailWithNullTags == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetailWithNullTags, result.getOrNull())
         coVerify { unsplashApiService.getPhotoDetail(photoId) }
     }
 
@@ -431,8 +433,8 @@ class PhotoRemoteDataSourceTest {
         val photoDetailResult = photoRemoteDataSource.getPhotoDetail("")
 
         // Then
-        assert(latestPhotosResult.isFailure)
-        assert(randomPhotosResult.isFailure)
-        assert(photoDetailResult.isFailure)
+        assertTrue(latestPhotosResult.isFailure)
+        assertTrue(randomPhotosResult.isFailure)
+        assertTrue(photoDetailResult.isFailure)
     }
 }

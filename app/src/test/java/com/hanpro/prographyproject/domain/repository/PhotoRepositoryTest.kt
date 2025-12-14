@@ -11,6 +11,8 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -52,8 +54,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { photoRemoteDataSource.getLatestPhotos(page, perPage) }
     }
 
@@ -72,8 +74,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getLatestPhotos(page, perPage)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRemoteDataSource.getLatestPhotos(page, perPage) }
     }
 
@@ -111,8 +113,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getRandomPhotos(count)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotos == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotos, result.getOrNull())
         coVerify { photoRemoteDataSource.getRandomPhotos(count) }
     }
 
@@ -129,8 +131,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getRandomPhotos(count)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRemoteDataSource.getRandomPhotos(count) }
     }
 
@@ -164,8 +166,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isSuccess)
-        assert(mockPhotoDetail == result.getOrNull())
+        assertTrue(result.isSuccess)
+        assertEquals(mockPhotoDetail, result.getOrNull())
         coVerify { photoRemoteDataSource.getPhotoDetail(photoId) }
     }
 
@@ -182,8 +184,8 @@ class PhotoRepositoryTest {
         val result = photoRepository.getPhotoDetail(photoId)
 
         // Then
-        assert(result.isFailure)
-        assert(exception == result.exceptionOrNull())
+        assertTrue(result.isFailure)
+        assertEquals(exception, result.exceptionOrNull())
         coVerify { photoRemoteDataSource.getPhotoDetail(photoId) }
     }
 
@@ -228,8 +230,8 @@ class PhotoRepositoryTest {
         val photoDetail = photoRepository.getPhotoDetail(photoId)
 
         // Then
-        assert(latestPhotos == latestPhotosResult)
-        assert(randomPhotos == randomPhotosResult)
-        assert(photoDetail == photoDetailResult)
+        assertEquals(latestPhotos, latestPhotosResult)
+        assertEquals(randomPhotos, randomPhotosResult)
+        assertEquals(photoDetail, photoDetailResult)
     }
 }
