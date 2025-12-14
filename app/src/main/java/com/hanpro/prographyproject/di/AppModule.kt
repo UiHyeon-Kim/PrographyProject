@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -27,32 +28,53 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+    @Named("apiClient")
+    fun provideApiOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        val cacheDirectory = File(context.cacheDir, "http_cache")
-        val cacheSize = 50L * 1024 * 1024 // 50 MB
-        val cache = Cache(cacheDirectory, cacheSize)
+        val cache = Cache(
+            File(context.cacheDir, "api_http_cache"),
+            50L * 1024 * 1024
+        )
 
         return OkHttpClient.Builder()
 //            .addInterceptor(logging)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .header("Authorization", "Client-ID ${BuildConfig.UNSPLASH_KEY}")
+                    .header(
+                        "Authorization",
+                        "Client-ID ${BuildConfig.UNSPLASH_KEY}"
+                    )
                     .build()
                 chain.proceed(request)
             }
-            // 네트워크 응답에 캐시 헤더 추가
             .addNetworkInterceptor { chain ->
                 val response = chain.proceed(chain.request())
                 response.newBuilder()
-                    .header("Cache-Control", "public, max-age=21600") // 6시간
-                    .removeHeader("Pragma")
-                    .removeHeader("Expires")
+                    .header("Cache-Control", "public, max-age=21600")
                     .build()
             }
+            .cache(cache)
+            .build()
+    }
+
+    /**
+     * 이미지 캐시를 위한 OkHttpClient
+     * - 이미지 요청에 API Key가 섞이지 않아 보안 문제 없음
+     */
+    @Provides
+    @Singleton
+    @Named("imageClient")
+    fun provideImageOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
+
+        val cache = Cache(
+            File(context.cacheDir, "image_http_cache"),
+            50L * 1024 * 1024
+        )
+
+        return OkHttpClient.Builder()
             .cache(cache)
             .build()
     }
@@ -61,11 +83,11 @@ object AppModule {
     @Singleton
     fun provideImageLoader(
         @ApplicationContext context: Context,
-        okHttpClient: OkHttpClient
+        @Named("imageClient") imageClient: OkHttpClient
     ): ImageLoader {
         return ImageLoader.Builder(context)
             .components {
-                add(OkHttpNetworkFetcherFactory(okHttpClient))
+                add(OkHttpNetworkFetcherFactory(imageClient))
             }
             // 메모리 캐시 설정
             .memoryCache {
@@ -86,7 +108,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(client: OkHttpClient): Retrofit {
+    fun provideRetrofit(
+        @Named("apiClient") client: OkHttpClient
+    ): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.unsplash.com/")
             .client(client)
