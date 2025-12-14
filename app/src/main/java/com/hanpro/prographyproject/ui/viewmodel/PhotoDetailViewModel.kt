@@ -57,15 +57,17 @@ class PhotoDetailViewModel @Inject constructor(
 
     fun addBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            addBookmarkUseCase(photo.toBookmark())
-            _uiState.update { it.copy(isBookmarked = true) }
+            runCatching { addBookmarkUseCase(photo.toBookmark()) }
+                .onSuccess { _uiState.update { it.copy(isBookmarked = true) } }
+                .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
         }
     }
 
     fun deleteBookmark(photo: PhotoDetail) {
         viewModelScope.launch {
-            deleteBookmarkUseCase(photo.toBookmark())
-            _uiState.update { it.copy(isBookmarked = false) }
+            runCatching { deleteBookmarkUseCase(photo.toBookmark()) }
+                .onSuccess { _uiState.update { it.copy(isBookmarked = false) } }
+                .onFailure { e -> _uiState.update { it.copy(error = e.message) } }
         }
     }
 }

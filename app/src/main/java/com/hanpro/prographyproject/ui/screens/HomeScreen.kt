@@ -89,7 +89,7 @@ fun HomeScreen(
 
                 val totalItems = gridState.layoutInfo.totalItemsCount
 
-                if (lastVisibleIndex >= totalItems - 3 && !uiState.isLoading && isConnected) {
+                if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && !uiState.isLoading && isConnected) {
                     val nextPage = uiState.currentPage + 1
                     viewModel.loadLatestPhotos(page = nextPage)
                 }
