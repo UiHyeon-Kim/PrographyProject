@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -41,6 +42,9 @@ object AppModule {
 
         return OkHttpClient.Builder()
 //            .addInterceptor(logging)
+            .connectTimeout(20, TimeUnit.SECONDS)   // 서버와 TCP를 연결하는데 걸리는 시간 제한
+            .readTimeout(20, TimeUnit.SECONDS)      // 응답 데이터를 읽는 시간 제한
+            .writeTimeout(20, TimeUnit.SECONDS)     // 요청 데이터를 소켓에 쓰는 시간 제한
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
                     .header(
@@ -49,12 +53,6 @@ object AppModule {
                     )
                     .build()
                 chain.proceed(request)
-            }
-            .addNetworkInterceptor { chain ->
-                val response = chain.proceed(chain.request())
-                response.newBuilder()
-                    .header("Cache-Control", "public, max-age=21600")
-                    .build()
             }
             .cache(cache)
             .build()
@@ -75,6 +73,9 @@ object AppModule {
         )
 
         return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
             .cache(cache)
             .build()
     }
