@@ -36,13 +36,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
+    pagerState: PagerState = rememberPagerState(pageCount = { viewModel.uiState.value.randomPhotos.size })
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
     val networkEvent by viewModel.networkEvent.collectAsState()
 
     val context = LocalContext.current
-    val pagerState = rememberPagerState(pageCount = { uiState.randomPhotos.size })
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
