@@ -101,6 +101,7 @@ class GetPhotoDetailUseCaseTest {
         // Then
         assertTrue(result.isSuccess)
         assertNull(result.getOrNull()?.description)
+        coVerify(exactly = 1) { photoRepository.getPhotoDetail(photoId) }
     }
 
     @Test
@@ -118,6 +119,7 @@ class GetPhotoDetailUseCaseTest {
         // Then
         assertTrue(result.isSuccess)
         assertNull(result.getOrNull()?.tags)
+        coVerify { photoRepository.getPhotoDetail(photoId) }
     }
 
     @Test
@@ -137,8 +139,10 @@ class GetPhotoDetailUseCaseTest {
             // Then
             assertTrue(result.isSuccess)
             assertEquals(photoId, result.getOrNull()?.id)
-            coVerify { photoRepository.getPhotoDetail(photoId) }
+            coVerify(exactly = 1) { photoRepository.getPhotoDetail(photoId) }
         }
+
+        confirmVerified(photoRepository)
     }
 
     @Test
@@ -151,9 +155,10 @@ class GetPhotoDetailUseCaseTest {
 
         // Then
         val exception = result.exceptionOrNull()
-        assert(result.isFailure)
-        assert(exception is IllegalArgumentException)
+        assertTrue(result.isFailure)
+        assertTrue(exception is IllegalArgumentException)
         assertEquals("Photo ID cannot be empty", exception?.message)
+        coVerify(exactly = 0) { photoRepository.getPhotoDetail(any()) }
     }
 
     @Test

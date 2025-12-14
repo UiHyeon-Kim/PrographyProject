@@ -102,7 +102,7 @@ class PhotoDetailViewModelTest {
         viewModel.loadPhotoDetail(photoId)
 
         // Then
-        assert(viewModel.uiState.value.isLoading)
+        assertTrue(viewModel.uiState.value.isLoading)
         // testDispatcher를 전진시켜 모든 scheduled coroutine 작업이 완료될 때까지 진행
         // StandardTestDispatcher를 쓸 땐 자동 진행이 안되므로 명시적 호출 필요
         // UnconfinedTestDispatcher 등 자동 진행되는 디스패처면 필요 없을 수도 있음
@@ -295,7 +295,7 @@ class PhotoDetailViewModelTest {
     fun `addBookmark는 상태를 즉시 업데이트한다`() = runTest {
         // Given
         coEvery { addBookmarkUseCase(any()) } returns Unit
-        assert(!viewModel.uiState.value.isBookmarked)
+        assertFalse(viewModel.uiState.value.isBookmarked)
 
         // When
         viewModel.addBookmark(mockPhotoDetail)
@@ -366,7 +366,7 @@ class PhotoDetailViewModelTest {
 
         viewModel.addBookmark(mockPhotoDetail)
         advanceUntilIdle()
-        assert(viewModel.uiState.value.isBookmarked)
+        assertTrue(viewModel.uiState.value.isBookmarked)
 
         // When
         viewModel.deleteBookmark(mockPhotoDetail)
@@ -386,12 +386,12 @@ class PhotoDetailViewModelTest {
         coEvery { deleteBookmarkUseCase(any()) } returns Unit
 
         // 초기 상태
-        assert(!viewModel.uiState.value.isBookmarked)
+        assertFalse(viewModel.uiState.value.isBookmarked)
 
         // 북마크 추가
         viewModel.addBookmark(mockPhotoDetail)
         advanceUntilIdle()
-        assert(viewModel.uiState.value.isBookmarked)
+        assertTrue(viewModel.uiState.value.isBookmarked)
 
         // 북마크 삭제
         viewModel.deleteBookmark(mockPhotoDetail)
