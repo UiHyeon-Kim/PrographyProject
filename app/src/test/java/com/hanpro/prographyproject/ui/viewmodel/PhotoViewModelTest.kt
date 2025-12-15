@@ -72,16 +72,16 @@ class PhotoViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         // network manager mock 설정
-        coEvery { networkManager.networkState } returns networkStateFlow
-        coEvery { networkManager.networkEvent } returns networkEventFlow
-        coEvery { networkManager.checkNetworkConnection() } returns true
+        every { networkManager.networkState } returns networkStateFlow
+        every { networkManager.networkEvent } returns networkEventFlow
+        every { networkManager.checkNetworkConnection() } returns true
+        every { networkManager.clearEvent() } just Runs
 
         // 기본 UseCase 반환 설정
         // ViewModel 내의 init 함수로 인해 값이 들어가 있을 수 있어 빈값으로 해두어야 함
         coEvery { getBookmarksUseCase() } returns flowOf(emptyList())
         coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(emptyList())
         coEvery { getRandomPhotosUseCase(any()) } returns Result.success(emptyList())
-        every { networkManager.clearEvent() } just Runs
     }
 
     @After
@@ -113,7 +113,8 @@ class PhotoViewModelTest {
         assertTrue(state.photos.isEmpty())
         assertTrue(state.randomPhotos.isEmpty())
         assertTrue(0 == state.randomPhotoIndex)
-        assertTrue(state.isLoading)
+        assertFalse(state.isLatestLoading)
+        assertFalse(state.isRandomLoading)
         assertNull(state.error)
     }
 
@@ -137,7 +138,8 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertEquals(photos, state.photos)
-        assertFalse(state.isLoading)
+        assertEquals(1, state.currentPage)
+        assertFalse(state.isLatestLoading)
         assertNull(state.error)
     }
 
@@ -158,7 +160,7 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertTrue(state.photos.isEmpty())
-        assertFalse(state.isLoading)
+        assertFalse(state.isLatestLoading)
         assertEquals(errorMessage, state.error)
     }
 
@@ -251,7 +253,7 @@ class PhotoViewModelTest {
         coVerify(exactly = 0) { getLatestPhotosUseCase.invoke(any(), any()) }
 
         val state = viewModel.uiState.value
-        assertFalse(state.isLoading)
+        assertFalse(state.isLatestLoading)
         assertTrue("네트워크 연결이 필요합니다." == state.error)
     }
 
@@ -275,7 +277,7 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertTrue(state.randomPhotos.contains(mockPhotoDetail.copy(id = "random-1")))
-        assertFalse(state.isLoading)
+        assertFalse(state.isRandomLoading)
         assertNull(state.error)
     }
 
@@ -317,7 +319,7 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertTrue(state.randomPhotos.isEmpty())
-        assertFalse(state.isLoading)
+        assertFalse(state.isRandomLoading)
         assertEquals(errorMessage, state.error)
     }
 
@@ -336,7 +338,7 @@ class PhotoViewModelTest {
         coVerify(exactly = 0) { getRandomPhotosUseCase.invoke(any()) }
 
         val state = viewModel.uiState.value
-        assertFalse(state.isLoading)
+        assertFalse(state.isRandomLoading)
         assertTrue("네트워크 연결이 필요합니다." == state.error)
     }
 
@@ -515,7 +517,7 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertTrue(state.photos.isEmpty())
-        assertFalse(state.isLoading)
+        assertFalse(state.isLatestLoading)
         assertNull(state.error)
     }
 
@@ -532,7 +534,7 @@ class PhotoViewModelTest {
         // Then
         val state = viewModel.uiState.value
         assertTrue(state.randomPhotos.isEmpty())
-        assertFalse(state.isLoading)
+        assertFalse(state.isRandomLoading)
         assertNull(state.error)
     }
 

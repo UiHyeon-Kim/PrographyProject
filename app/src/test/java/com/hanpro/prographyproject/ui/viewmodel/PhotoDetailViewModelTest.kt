@@ -103,10 +103,11 @@ class PhotoDetailViewModelTest {
 
         // Then
         assertTrue(viewModel.uiState.value.isLoading)
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.isLoading)
         // testDispatcher를 전진시켜 모든 scheduled coroutine 작업이 완료될 때까지 진행
         // StandardTestDispatcher를 쓸 땐 자동 진행이 안되므로 명시적 호출 필요
         // UnconfinedTestDispatcher 등 자동 진행되는 디스패처면 필요 없을 수도 있음
-        advanceUntilIdle()
         coVerify { getPhotoDetailUseCase(photoId) }
     }
 
@@ -309,7 +310,7 @@ class PhotoDetailViewModelTest {
     // deleteBookmark 테스트
 
     @Test
-    fun `deletebookmark는 UseCase를 호출하고 북마크 상태를 업데이트한다`() = runTest {
+    fun `deleteBookmark는 UseCase를 호출하고 북마크 상태를 업데이트한다`() = runTest {
         // Given
         coEvery { addBookmarkUseCase(any()) } returns Unit
         coEvery { deleteBookmarkUseCase(any()) } returns Unit
