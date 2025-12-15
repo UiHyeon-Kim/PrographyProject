@@ -22,7 +22,8 @@ data class PhotoUiState(
     val randomPhotos: List<PhotoDetail> = emptyList(),
     val randomPhotoIndex: Int = 0,
     val currentPage: Int = 1,
-    val isLoading: Boolean = true,
+    val isLatestLoading: Boolean = false,
+    val isRandomLoading: Boolean = false,
     val error: String? = null,
 )
 
@@ -60,12 +61,11 @@ class PhotoViewModel @Inject constructor(
                     cancelRetry()
                     retryCount = 0
 
-                    if (uiState.value.photos.isEmpty() || uiState.value.error != null) loadLatestPhotos()
-                    if (uiState.value.randomPhotos.isEmpty() || uiState.value.error != null) loadRandomPhotos()
                 } else {
-                    _uiState.update { it.copy(isLoading = false, error = "네트워크가 연결되어 있지 않습니다.") }
-
-                    startAutoRetry()
+                    if (uiState.value.photos.isEmpty() && uiState.value.randomPhotos.isEmpty()) {
+                        _uiState.update { it.copy(isLatestLoading = false, error = "네트워크가 연결되어 있지 않습니다.") }
+                        startAutoRetry()
+                    }
                 }
             }
         }
@@ -126,34 +126,44 @@ class PhotoViewModel @Inject constructor(
     fun loadLatestPhotos(page: Int = 1, perPage: Int = 20) {
         // 네트워크 연결이 안 되어있다면 API 호출 막음
         if (!isConnected.value) {
-            _uiState.update { it.copy(isLoading = false, error = "네트워크 연결이 필요합니다.") }
+            _uiState.update { it.copy(isLatestLoading = false, error = "네트워크 연결이 필요합니다.") }
+            return
+        }
+
+        // 같은 페이지 중복 로딩 방지
+        if (page == uiState.value.currentPage && uiState.value.isLatestLoading) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLatestLoading = true, error = null) }
 
             getLatestPhotosUseCase(page, perPage)
                 .onSuccess { photos ->
                     retryCount = 0
                     _uiState.update { state ->
-                        val newPhotos = if (page == 1) photos else state.photos + photos
-                        state.copy(photos = newPhotos, currentPage = page, isLoading = false, error = null)
+                        val newPhotos = if (page == 1) photos else (state.photos + photos).distinctBy { it.id }
+                        state.copy(photos = newPhotos, currentPage = page, isLatestLoading = false, error = null)
                     }
                 }.onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
+                    _uiState.update { it.copy(isLatestLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
         }
     }
 
     fun loadRandomPhotos() {
         if (!isConnected.value) {
-            _uiState.update { it.copy(isLoading = false, error = "네트워크 연결이 필요합니다.") }
+            _uiState.update { it.copy(isRandomLoading = false, error = "네트워크 연결이 필요합니다.") }
+            return
+        }
+
+        // 중복 로딩 방지
+        if (uiState.value.isRandomLoading) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isRandomLoading = true, error = null) }
 
             getRandomPhotosUseCase(10)
                 .onSuccess { photos ->
@@ -162,12 +172,12 @@ class PhotoViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             randomPhotos = _uiState.value.randomPhotos + photos,
-                            isLoading = false,
+                            isRandomLoading = false,
                             error = null
                         )
                     }
                 }.onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
+                    _uiState.update { it.copy(isRandomLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
         }
     }

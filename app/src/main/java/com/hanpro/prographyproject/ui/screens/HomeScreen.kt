@@ -37,6 +37,8 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
@@ -46,6 +48,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  * 북마크가 있을 경우 상단에 가로 스크롤 가능한 북마크 목록을, 그 아래에 최신 이미지 격자 레이아웃을 렌더링한다.
  * 사용자가 사진을 선택하면 해당 사진의 상세 다이얼로그를 표시하고, 다이얼로그가 닫히면 선택 상태를 해제한다.
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
@@ -60,13 +63,16 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
+
+        if (uiState.photos.isEmpty()) {
+            viewModel.loadLatestPhotos()
+        }
     }
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
             is NetworkEvent.Connected -> {
                 viewModel.retryConnection()
-                Toast.makeText(context, "네트워크가 연결되었습니다", Toast.LENGTH_SHORT).show()
             }
 
             is NetworkEvent.Disconnected -> {
@@ -84,12 +90,13 @@ fun HomeScreen(
     LaunchedEffect(gridState) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
+            .debounce(300)
             .collect { lastVisibleIndex ->
                 if (lastVisibleIndex == null) return@collect
 
                 val totalItems = gridState.layoutInfo.totalItemsCount
 
-                if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && !uiState.isLoading && isConnected) {
+                if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && !uiState.isLatestLoading && isConnected) {
                     val nextPage = uiState.currentPage + 1
                     viewModel.loadLatestPhotos(page = nextPage)
                 }
@@ -101,7 +108,7 @@ fun HomeScreen(
             NoNetworkScreen { viewModel.retryConnection() }
         }
 
-        uiState.isLoading && uiState.photos.isEmpty() -> {
+        uiState.isLatestLoading && uiState.photos.isEmpty() -> {
             HomeSkeletonContent()
         }
 

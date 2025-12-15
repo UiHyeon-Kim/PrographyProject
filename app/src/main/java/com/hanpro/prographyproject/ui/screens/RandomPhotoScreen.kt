@@ -24,6 +24,8 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
  * 초기에 사진 목록이 비어 있으면 데이터를 로드하고 로딩 인디케이터를 표시한다. 페이저의 현재 페이지가 목록 끝에 가까워지면 추가 사진을 사전 로드한다.
  * 각 사진 카드에서 다음 페이지로 이동하거나 북마크를 추가하면 페이저를 다음 페이지로 이동시키고 내부 인덱스를 갱신하며, 사진 상세보기는 다이얼로그로 표시된다.
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
@@ -43,6 +46,12 @@ fun RandomPhotoScreen(
     val networkEvent by viewModel.networkEvent.collectAsState()
 
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (uiState.randomPhotos.isEmpty()) {
+            viewModel.loadRandomPhotos()
+        }
+    }
 
     LaunchedEffect(networkEvent) {
         when (networkEvent) {
@@ -64,7 +73,8 @@ fun RandomPhotoScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
             .filter { page -> uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3 }
-            .collect { if (isConnected && !uiState.isLoading) viewModel.loadRandomPhotos() }
+            .debounce(300)
+            .collect { if (isConnected && !uiState.isRandomLoading) viewModel.loadRandomPhotos() }
     }
 
     when {
@@ -72,7 +82,7 @@ fun RandomPhotoScreen(
             NoNetworkScreen { viewModel.retryConnection() }
         }
 
-        uiState.isLoading && uiState.randomPhotos.isEmpty() -> {
+        uiState.isRandomLoading && uiState.randomPhotos.isEmpty() -> {
             RandomSkeletonContent()
         }
 
