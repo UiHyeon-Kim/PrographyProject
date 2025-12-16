@@ -14,6 +14,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.hanpro.prographyproject.R
 
+/**
+ * 네트워크 연결이 끊겼음을 사용자에게 알리고 새로고침 동작을 제공하는 UI를 표시합니다.
+ *
+ * @param onRefresh 새로고침 버튼을 눌렀을 때 호출되는 콜백.
+ */
 @Composable
 fun NoNetworkScreen(
     onRefresh: () -> Unit

@@ -46,6 +46,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  * 북마크가 있을 경우 상단에 가로 스크롤 가능한 북마크 목록을, 그 아래에 최신 이미지 격자 레이아웃을 렌더링한다.
  * 사용자가 사진을 선택하면 해당 사진의 상세 다이얼로그를 표시하고, 다이얼로그가 닫히면 선택 상태를 해제한다.
  */
+/**
+ * 홈 화면을 구성하고 네트워크 상태, 무한 스크롤 페이징, 북마크 및 최신 사진 목록의 표시를 관리한다.
+ *
+ * 구성된 동작:
+ * - 컴포지션 시 상태바 색상을 투명으로 설정하고 아이콘을 어둡게 표시한다.
+ * - 네트워크 연결 이벤트에 따라 재시도 호출 및 사용자에게 토스트로 상태를 알린다.
+ * - 그리드 스크롤 위치를 관찰해 마지막 항목에 근접하면 다음 페이지의 사진을 로드한다(로딩 중이 아니고 네트워크가 연결된 경우).
+ * - 네트워크 미연결, 초기 로딩, 에러 및 정상 상태에 따라 적절한 하위 UI(NoNetworkScreen, HomeSkeletonContent, 에러 인디케이터, HomeContent)를 표시한다.
+ */
 @Composable
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
@@ -120,6 +129,17 @@ fun HomeScreen(
     }
 }
 
+/**
+ * 북마크 목록과 최신 이미지 그리드를 화면에 렌더링하고 선택한 사진의 상세 다이얼로그를 표시한다.
+ *
+ * 북마크가 존재하면 상단에 가로 스크롤되는 북마크 카드 행을 표시하고, 최신 이미지는 2열 Staggered 그리드로 렌더링합니다.
+ * 각 사진을 탭하면 해당 사진의 상세 다이얼로그가 열리고, 닫으면 다이얼로그가 해제됩니다.
+ *
+ * @param bookmarks 표시할 북마크 목록
+ * @param photos 최신 이미지의 상세 정보 목록
+ * @param gridState 최신 이미지 그리드의 레이아웃 및 스크롤 상태
+ * @param modifier 외부에서 전달되는 Modifier (테스트 태그 및 레이아웃 조정에 사용)
+ */
 @Composable
 private fun HomeContent(
     bookmarks: List<Bookmark>,
@@ -197,6 +217,12 @@ private fun HomeContent(
     }
 }
 
+/**
+ * 북마크 목록과 최신 이미지 그리드에 대한 로딩 스켈레톤 UI를 표시한다.
+ *
+ * 샘-머(Shimmer) 효과가 적용된 헤더, 가로 스크롤 북마크 플레이스홀더, 섹션 타이틀 플레이스홀더,
+ * 그리고 2열 그리드 형태의 이미지 플레이스홀더로 구성된 전체 로딩 상태 레이아웃을 렌더링한다.
+ */
 @Composable
 private fun HomeSkeletonContent(
     modifier: Modifier = Modifier
