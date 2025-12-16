@@ -185,7 +185,7 @@ class PhotoViewModel @Inject constructor(
 
                     _uiState.update {
                         it.copy(
-                            randomPhotos = _uiState.value.randomPhotos + photos,
+                            randomPhotos = it.randomPhotos + photos,
                             isRandomLoading = false,
                             error = null
                         )
@@ -197,7 +197,7 @@ class PhotoViewModel @Inject constructor(
     }
 
     fun incrementIndex() {
-        _uiState.update { it.copy(randomPhotoIndex = _uiState.value.randomPhotoIndex + 1) }
+        _uiState.update { it.copy(randomPhotoIndex = it.randomPhotoIndex + 1) }
     }
 
     fun addBookmark(photo: PhotoDetail) {

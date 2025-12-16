@@ -44,12 +44,13 @@ object AppModule {
      *
      * @param context HTTP 및 이미지 디스크 캐시를 생성하기 위해 사용할 Application Context.
      * @return 구성된 OkHttpClient 인스턴스.
+     */
     @Provides
     @Singleton
     @ApiClient
     fun provideApiOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
             else HttpLoggingInterceptor.Level.NONE
             redactHeader("Authorization")
         }

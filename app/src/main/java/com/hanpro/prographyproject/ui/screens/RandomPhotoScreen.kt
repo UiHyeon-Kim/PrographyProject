@@ -39,13 +39,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun RandomPhotoScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
-    pagerState: PagerState = rememberPagerState(pageCount = { viewModel.uiState.value.randomPhotos.size })
+    pagerState: PagerState? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isConnected by viewModel.isConnected.collectAsState()
     val networkEvent by viewModel.networkEvent.collectAsState()
 
     val context = LocalContext.current
+
+    val actualPagerState = pagerState ?: rememberPagerState(pageCount = { uiState.randomPhotos.size })
 
     LaunchedEffect(Unit) {
         if (uiState.randomPhotos.isEmpty()) {
@@ -70,8 +72,8 @@ fun RandomPhotoScreen(
         }
     }
 
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
+    LaunchedEffect(actualPagerState) {
+        snapshotFlow { actualPagerState.currentPage }
             .filter { page -> uiState.randomPhotos.isNotEmpty() && page >= uiState.randomPhotos.size - 3 }
             .debounce(300)
             .collect { if (isConnected && !uiState.isRandomLoading) viewModel.loadRandomPhotos() }
@@ -93,7 +95,7 @@ fun RandomPhotoScreen(
 
         else -> {
             RandomPhotoContent(
-                pagerState = pagerState,
+                pagerState = actualPagerState,
                 randomPhotos = uiState.randomPhotos,
                 onIndexIncrement = { viewModel.incrementIndex() },
                 onBookmarkAdd = { photo -> viewModel.addBookmark(photo) },
@@ -139,6 +141,7 @@ private fun RandomPhotoContent(
         ) { page ->
             val photo = randomPhotos[page]
             PhotoCardItems(
+                modifier = Modifier.testTag("photo_$page"),
                 photo = photo,
                 onNextClick = {
                     coroutineScope.launch {

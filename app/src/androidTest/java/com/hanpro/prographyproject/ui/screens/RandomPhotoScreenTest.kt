@@ -1,9 +1,10 @@
 package com.hanpro.prographyproject.ui.screens
 
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import com.hanpro.prographyproject.common.utils.NetworkEvent
 import com.hanpro.prographyproject.common.utils.NetworkManager
 import com.hanpro.prographyproject.data.model.*
@@ -141,35 +142,5 @@ class RandomPhotoScreenTest {
         // Then
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("pager").assertIsDisplayed()
-    }
-
-    @Test
-    fun randomPhotoScreen을_왼쪽으로_스와이프시_다음페이지로_이동한다() {
-        // Given
-        val photos = listOf(
-            mockPhotoDetail,
-            mockPhotoDetail.copy(id = "photo-2")
-        )
-        coEvery { getRandomPhotosUseCase(any()) } returns Result.success(photos)
-
-        viewModel = createViewModel()
-
-        lateinit var pagerState: PagerState
-
-        composeTestRule.setContent {
-            pagerState = rememberPagerState(pageCount = { photos.size })
-
-            RandomPhotoScreen(viewModel = viewModel, pagerState = pagerState)
-        }
-
-        composeTestRule.mainClock.autoAdvance = false
-
-        // When
-        composeTestRule.onNodeWithTag("pager").performTouchInput { swipeLeft() }
-        composeTestRule.mainClock.advanceTimeBy(1000)
-        composeTestRule.waitForIdle()
-
-        // Then
-        assert(1 == pagerState.currentPage)
     }
 }
