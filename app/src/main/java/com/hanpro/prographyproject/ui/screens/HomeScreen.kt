@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -36,17 +37,20 @@ import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 
 /**
- * 홈 화면 컴포저블로 최신 이미지 목록과 북마크 섹션을 표시하고 사진 상세 다이얼로그를 관리한다.
+ * 홈 화면을 구성하고 네트워크 상태, 무한 스크롤 페이징, 북마크 및 최신 사진 목록의 표시를 관리한다.
  *
- * 화면이 처음 구성될 때 최신 사진을 로드하고 상태 표시줄 색상을 투명으로 설정한다. 스크롤 위치에 따라 다음 페이지를 자동으로 로드하는 무한 스크롤을 수행하며,
- * 북마크가 있을 경우 상단에 가로 스크롤 가능한 북마크 목록을, 그 아래에 최신 이미지 격자 레이아웃을 렌더링한다.
- * 사용자가 사진을 선택하면 해당 사진의 상세 다이얼로그를 표시하고, 다이얼로그가 닫히면 선택 상태를 해제한다.
+ * 구성된 동작:
+ * - 컴포지션 시 상태바 색상을 투명으로 설정하고 아이콘을 어둡게 표시한다.
+ * - 네트워크 연결 이벤트에 따라 재시도 호출 및 사용자에게 토스트로 상태를 알린다.
+ * - 그리드 스크롤 위치를 관찰해 마지막 항목에 근접하면 다음 페이지의 사진을 로드한다(로딩 중이 아니고 네트워크가 연결된 경우).
+ * - 네트워크 미연결, 초기 로딩, 에러 및 정상 상태에 따라 적절한 하위 UI(NoNetworkScreen, HomeSkeletonContent, 에러 인디케이터, HomeContent)를 표시한다.
  */
+@OptIn(FlowPreview::class)
 @Composable
 fun HomeScreen(
     viewModel: PhotoViewModel = hiltViewModel(),
@@ -61,6 +65,10 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         systemUiController.setStatusBarColor(color = Color(0x00000000), darkIcons = true)
+
+        if (uiState.photos.isEmpty()) {
+            viewModel.loadLatestPhotos()
+        }
     }
 
     LaunchedEffect(networkEvent) {
@@ -82,19 +90,16 @@ fun HomeScreen(
 
     // 무한 스크롤
     LaunchedEffect(gridState) {
-        snapshotFlow { gridState.layoutInfo }
-            .map { layoutInfo ->
-                val totalItems = layoutInfo.totalItemsCount
-                val lastVisibleItemIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                Pair(totalItems, lastVisibleItemIndex)
-            }
+        snapshotFlow { gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
-            .filter { (totalItems, lastVisibleItemIndex) ->
-                totalItems > 0 && lastVisibleItemIndex >= totalItems - 3
-            }
-            .collect {
-                if (!uiState.isLoading && isConnected) {
-                    val nextPage = (uiState.photos.size / 30) + 1
+            .debounce(300)
+            .collect { lastVisibleIndex ->
+                if (lastVisibleIndex == null) return@collect
+
+                val totalItems = gridState.layoutInfo.totalItemsCount
+
+                if (totalItems > 0 && lastVisibleIndex >= totalItems - 3 && !uiState.isLatestLoading && isConnected) {
+                    val nextPage = uiState.currentPage + 1
                     viewModel.loadLatestPhotos(page = nextPage)
                 }
             }
@@ -105,7 +110,7 @@ fun HomeScreen(
             NoNetworkScreen { viewModel.retryConnection() }
         }
 
-        uiState.isLoading && uiState.photos.isEmpty() -> {
+        uiState.isLatestLoading && uiState.photos.isEmpty() -> {
             HomeSkeletonContent()
         }
 
@@ -124,15 +129,30 @@ fun HomeScreen(
     }
 }
 
+/**
+ * 북마크 목록과 최신 이미지 그리드를 화면에 렌더링하고 선택한 사진의 상세 다이얼로그를 표시한다.
+ *
+ * 북마크가 존재하면 상단에 가로 스크롤되는 북마크 카드 행을 표시하고, 최신 이미지는 2열 Staggered 그리드로 렌더링합니다.
+ * 각 사진을 탭하면 해당 사진의 상세 다이얼로그가 열리고, 닫으면 다이얼로그가 해제됩니다.
+ *
+ * @param bookmarks 표시할 북마크 목록
+ * @param photos 최신 이미지의 상세 정보 목록
+ * @param gridState 최신 이미지 그리드의 레이아웃 및 스크롤 상태
+ * @param modifier 외부에서 전달되는 Modifier (테스트 태그 및 레이아웃 조정에 사용)
+ */
 @Composable
 private fun HomeContent(
     bookmarks: List<Bookmark>,
     photos: List<PhotoDetail>,
     gridState: LazyStaggeredGridState,
+    modifier: Modifier = Modifier
 ) {
     var selectedPhotoId by remember { mutableStateOf<String?>(null) }
 
-    Surface(color = MaterialTheme.colorScheme.background) {
+    Surface(
+        modifier = modifier.testTag("HomeScreen"),
+        color = MaterialTheme.colorScheme.background
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(top = 16.dp)
@@ -179,7 +199,8 @@ private fun HomeContent(
                         PhotoCard(
                             cardModifier = Modifier
                                 .fillMaxWidth()
-                                .wrapContentHeight(),
+                                .wrapContentHeight()
+                                .testTag("latest_photo"),
                             imageUrl = photo.urls.regular,
                             photoDescription = photo.description,
                             onClick = { selectedPhotoId = photo.id },
@@ -196,11 +217,21 @@ private fun HomeContent(
     }
 }
 
+/**
+ * 북마크 목록과 최신 이미지 그리드에 대한 로딩 스켈레톤 UI를 표시한다.
+ *
+ * 쉬머(Shimmer) 효과가 적용된 헤더, 가로 스크롤 북마크 플레이스홀더, 섹션 타이틀 플레이스홀더,
+ * 그리고 2열 그리드 형태의 이미지 플레이스홀더로 구성된 전체 로딩 상태 레이아웃을 렌더링한다.
+ */
 @Composable
-private fun HomeSkeletonContent() {
+private fun HomeSkeletonContent(
+    modifier: Modifier = Modifier
+) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
-    Column {
+    Column(
+        modifier = modifier.testTag("home_skeleton")
+    ) {
         Spacer(Modifier.height(16.dp))
 
         Box(

@@ -10,8 +10,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.hanpro.prographyproject.R
 
+/**
+ * 네트워크 연결이 끊겼음을 사용자에게 알리고 새로고침 동작을 제공하는 UI를 표시합니다.
+ *
+ * @param onRefresh 새로고침 버튼을 눌렀을 때 호출되는 콜백.
+ */
 @Composable
 fun NoNetworkScreen(
     onRefresh: () -> Unit
@@ -30,12 +37,12 @@ fun NoNetworkScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("인터넷이 원활하지 않아요")
-        Text("인터넷 연결을 다시 확인해 주세요")
+        Text(stringResource(R.string.no_network_title))
+        Text(stringResource(R.string.no_network_description))
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
+        OutlinedButton(
             onClick = onRefresh,
             modifier = Modifier.padding(4.dp),
             shape = RoundedCornerShape(8.dp),
@@ -46,7 +53,7 @@ fun NoNetworkScreen(
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ),
         ) {
-            Text("새로고침")
+            Text(stringResource(R.string.refresh))
         }
     }
 }

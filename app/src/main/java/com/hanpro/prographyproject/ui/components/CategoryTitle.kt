@@ -18,11 +18,14 @@ import com.hanpro.prographyproject.ui.theme.PrographyProjectTheme
  * @param title 표시할 제목 문자열
  */
 @Composable
-fun CategoryTitle(title: String) {
+fun CategoryTitle(
+    title: String,
+    modifier: Modifier = Modifier
+) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier
+        modifier = modifier
             .padding(start = 20.dp, top = 10.dp, end = 20.dp, bottom = 9.dp)
             .fillMaxWidth()
     )

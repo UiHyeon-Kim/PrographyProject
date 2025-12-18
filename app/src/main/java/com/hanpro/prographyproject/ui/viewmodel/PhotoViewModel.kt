@@ -21,7 +21,9 @@ data class PhotoUiState(
     val photos: List<PhotoDetail> = emptyList(),
     val randomPhotos: List<PhotoDetail> = emptyList(),
     val randomPhotoIndex: Int = 0,
-    val isLoading: Boolean = true,
+    val currentPage: Int = 1,
+    val isLatestLoading: Boolean = false,
+    val isRandomLoading: Boolean = false,
     val error: String? = null,
 )
 
@@ -59,12 +61,17 @@ class PhotoViewModel @Inject constructor(
                     cancelRetry()
                     retryCount = 0
 
-                    if (uiState.value.photos.isEmpty() || uiState.value.error != null) loadLatestPhotos()
-                    if (uiState.value.randomPhotos.isEmpty() || uiState.value.error != null) loadRandomPhotos()
                 } else {
-                    _uiState.update { it.copy(isLoading = false, error = "네트워크가 연결되어 있지 않습니다.") }
-
-                    startAutoRetry()
+                    if (uiState.value.photos.isEmpty() && uiState.value.randomPhotos.isEmpty()) {
+                        _uiState.update {
+                            it.copy(
+                                isLatestLoading = false,
+                                isRandomLoading = false,
+                                error = "네트워크가 연결되어 있지 않습니다."
+                            )
+                        }
+                        startAutoRetry()
+                    }
                 }
             }
         }
@@ -117,43 +124,66 @@ class PhotoViewModel @Inject constructor(
         retryJob = null
     }
 
+    /**
+     * ViewModel이 소멸될 때 호출되어 진행 중인 자동 재시도 작업을 취소한다.
+     *
+     * 이 메서드는 뷰모델 종료 시점에 등록된 재시도 Job을 종료해 추가 백그라운드 시도를 중단한다.
+     */
     override fun onCleared() {
         super.onCleared()
         cancelRetry() // 뷰모델 종료 시 재시도 작업 취소
     }
 
+    /**
+     * 최신 사진 목록을 불러와 UI 상태를 갱신합니다.
+     *
+     * 네트워크 연결이 없으면 즉시 에러 상태를 설정하고 호출을 중단합니다. 호출이 성공하면
+     * page가 1일 때 기존 목록을 교체하고, 그렇지 않으면 기존 목록에 이어 붙이며 currentPage, isLoading, error를 갱신합니다.
+     *
+     * @param page 불러올 페이지 번호 (기본값 1).
+     * @param perPage 한 페이지당 가져올 사진 수 (기본값 30).
+     */
     fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
         // 네트워크 연결이 안 되어있다면 API 호출 막음
         if (!isConnected.value) {
-            _uiState.update { it.copy(isLoading = false, error = "네트워크 연결이 필요합니다.") }
+            _uiState.update { it.copy(isLatestLoading = false, error = "네트워크 연결이 필요합니다.") }
+            return
+        }
+
+        // 같은 페이지 중복 로딩 방지
+        if (page == uiState.value.currentPage && uiState.value.isLatestLoading) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLatestLoading = true, error = null) }
 
             getLatestPhotosUseCase(page, perPage)
                 .onSuccess { photos ->
                     retryCount = 0
                     _uiState.update { state ->
-                        val newPhotos = if (page == 1) photos
-                        else (state.photos + photos).distinctBy { it.id }
-                        state.copy(photos = newPhotos, isLoading = false, error = null)
+                        val newPhotos = if (page == 1) photos else (state.photos + photos).distinctBy { it.id }
+                        state.copy(photos = newPhotos, currentPage = page, isLatestLoading = false, error = null)
                     }
                 }.onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
+                    _uiState.update { it.copy(isLatestLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
         }
     }
 
     fun loadRandomPhotos() {
         if (!isConnected.value) {
-            _uiState.update { it.copy(isLoading = false, error = "네트워크 연결이 필요합니다.") }
+            _uiState.update { it.copy(isRandomLoading = false, error = "네트워크 연결이 필요합니다.") }
+            return
+        }
+
+        // 중복 로딩 방지
+        if (uiState.value.isRandomLoading) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isRandomLoading = true, error = null) }
 
             getRandomPhotosUseCase(10)
                 .onSuccess { photos ->
@@ -161,19 +191,19 @@ class PhotoViewModel @Inject constructor(
 
                     _uiState.update {
                         it.copy(
-                            randomPhotos = _uiState.value.randomPhotos + photos,
-                            isLoading = false,
+                            randomPhotos = it.randomPhotos + photos,
+                            isRandomLoading = false,
                             error = null
                         )
                     }
                 }.onFailure { e ->
-                    _uiState.update { it.copy(isLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
+                    _uiState.update { it.copy(isRandomLoading = false, error = e.message ?: "알 수 없는 오류가 발생했습니다.") }
                 }
         }
     }
 
     fun incrementIndex() {
-        _uiState.update { it.copy(randomPhotoIndex = _uiState.value.randomPhotoIndex + 1) }
+        _uiState.update { it.copy(randomPhotoIndex = it.randomPhotoIndex + 1) }
     }
 
     fun addBookmark(photo: PhotoDetail) {

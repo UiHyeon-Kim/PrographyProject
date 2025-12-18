@@ -7,6 +7,9 @@ import javax.inject.Inject
 class GetPhotoDetailUseCase @Inject constructor(
     private val photoRepository: PhotoRepository
 ) {
-    suspend operator fun invoke(id: String): Result<PhotoDetail> =
-        photoRepository.getPhotoDetail(id)
+    suspend operator fun invoke(id: String): Result<PhotoDetail> = when {
+        id.isBlank() -> Result.failure(IllegalArgumentException("Photo ID cannot be empty"))
+
+        else -> photoRepository.getPhotoDetail(id)
+    }
 }
