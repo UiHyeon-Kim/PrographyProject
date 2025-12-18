@@ -63,7 +63,13 @@ class PhotoViewModel @Inject constructor(
 
                 } else {
                     if (uiState.value.photos.isEmpty() && uiState.value.randomPhotos.isEmpty()) {
-                        _uiState.update { it.copy(isLatestLoading = false, error = "네트워크가 연결되어 있지 않습니다.") }
+                        _uiState.update {
+                            it.copy(
+                                isLatestLoading = false,
+                                isRandomLoading = false,
+                                error = "네트워크가 연결되어 있지 않습니다."
+                            )
+                        }
                         startAutoRetry()
                     }
                 }
@@ -135,9 +141,9 @@ class PhotoViewModel @Inject constructor(
      * page가 1일 때 기존 목록을 교체하고, 그렇지 않으면 기존 목록에 이어 붙이며 currentPage, isLoading, error를 갱신합니다.
      *
      * @param page 불러올 페이지 번호 (기본값 1).
-     * @param perPage 한 페이지당 가져올 사진 수 (기본값 20).
+     * @param perPage 한 페이지당 가져올 사진 수 (기본값 30).
      */
-    fun loadLatestPhotos(page: Int = 1, perPage: Int = 20) {
+    fun loadLatestPhotos(page: Int = 1, perPage: Int = 30) {
         // 네트워크 연결이 안 되어있다면 API 호출 막음
         if (!isConnected.value) {
             _uiState.update { it.copy(isLatestLoading = false, error = "네트워크 연결이 필요합니다.") }
