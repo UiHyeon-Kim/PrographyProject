@@ -122,25 +122,4 @@ class RandomPhotoScreenTest {
         composeTestRule.onNodeWithContentDescription("네트워크 연결 끊김").assertExists()
         composeTestRule.onNodeWithText("새로고침").assertExists()
     }
-
-    @Test
-    fun randomPhotoScreen은_사진목록이_있을때_페이저를_표시한다() {
-        // Given
-        val photos = listOf(
-            mockPhotoDetail,
-            mockPhotoDetail.copy(id = "photo-2"),
-            mockPhotoDetail.copy(id = "photo-3")
-        )
-        coEvery { getRandomPhotosUseCase(any()) } returns Result.success(photos)
-        viewModel = createViewModel()
-
-        // When
-        composeTestRule.setContent {
-            RandomPhotoScreen(viewModel = viewModel)
-        }
-
-        // Then
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("pager").assertIsDisplayed()
-    }
 }

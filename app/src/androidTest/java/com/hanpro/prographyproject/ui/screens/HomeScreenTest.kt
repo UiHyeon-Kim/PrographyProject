@@ -4,13 +4,13 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.hanpro.prographyproject.common.utils.NetworkEvent
 import com.hanpro.prographyproject.common.utils.NetworkManager
-import com.hanpro.prographyproject.data.model.*
 import com.hanpro.prographyproject.data.source.local.Bookmark
 import com.hanpro.prographyproject.domain.usecase.*
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,9 +59,9 @@ class HomeScreenTest {
     fun setup() {
         MockKAnnotations.init(this, relaxed = true, relaxUnitFun = true)
 
-        coEvery { networkManager.networkState } returns networkStateFlow
-        coEvery { networkManager.networkEvent } returns networkEventFlow
-        coEvery { networkManager.checkNetworkConnection() } returns true
+        every { networkManager.networkState } returns networkStateFlow
+        every { networkManager.networkEvent } returns networkEventFlow
+        every { networkManager.checkNetworkConnection() } returns true
 
         coEvery { getLatestPhotosUseCase(any(), any()) } returns Result.success(emptyList())
         coEvery { getRandomPhotosUseCase(any()) } returns Result.success(emptyList())
