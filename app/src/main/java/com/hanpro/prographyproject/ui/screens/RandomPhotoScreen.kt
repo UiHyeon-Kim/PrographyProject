@@ -2,12 +2,24 @@ package com.hanpro.prographyproject.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +30,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.hanpro.prographyproject.common.utils.NetworkEvent
 import com.hanpro.prographyproject.data.model.PhotoDetail
 import com.hanpro.prographyproject.ui.components.PhotoCardItems
-import com.hanpro.prographyproject.ui.components.PrographyProgressIndicator
 import com.hanpro.prographyproject.ui.dialog.PhotoDetailDialog
 import com.hanpro.prographyproject.ui.viewmodel.PhotoViewModel
 import com.valentinilk.shimmer.ShimmerBounds
@@ -89,8 +100,10 @@ fun RandomPhotoScreen(
         }
 
         uiState.error != null && uiState.randomPhotos.isEmpty() -> {
-            PrographyProgressIndicator()
-            // TODO: 네트워크 확인 및 재연결 로직
+            ErrorScreen(
+                message = uiState.error ?: "데이터를 불러오는 중 문제가 발생했습니다.",
+                onRetry = { viewModel.loadRandomPhotos() }
+            )
         }
 
         else -> {
